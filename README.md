@@ -8,7 +8,7 @@ Growveld is a first-person farming and business simulator prototype set in a fic
 - Render pipeline: Universal Render Pipeline (URP)
 - Input: Unity Input System
 - Initial platform: Windows, keyboard and mouse
-- Current milestone: Phase 23 - prototype economy balancing
+- Current milestone: Phase 24 complete - polished end-to-end prototype
 
 ## Current controls
 
@@ -25,7 +25,10 @@ Growveld is a first-person farming and business simulator prototype set in a fic
 - `T`: Open or close the business tablet
 - `F5`: Save the game manually
 - `F9`: Load the latest save
-- `Escape`: Release the mouse cursor
+- `H`: Open the full controls reference
+- `Escape`: Pause or go back
 - Left click in the Game view: Lock the cursor again
+
+See `Assets/_Project/Docs/PLAYTEST_GUIDE.md` for the complete first-farm loop.
 
 The Unity project belongs at this repository root. Commit `Assets`, `Packages`, and `ProjectSettings`; do not commit Unity's generated `Library`, `Temp`, `Logs`, `Obj`, `Build`, or `UserSettings` folders.

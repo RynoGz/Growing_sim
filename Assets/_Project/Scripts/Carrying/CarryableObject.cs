@@ -22,6 +22,7 @@ namespace Growveld.Carrying
         private RigidbodyInterpolation originalInterpolation;
 
         public string InteractionPrompt => $"Pick up {displayName}";
+        public string DisplayName => displayName;
 
         public bool IsCarried => currentCarrier != null;
 
