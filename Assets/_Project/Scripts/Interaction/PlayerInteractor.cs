@@ -1,3 +1,4 @@
+using Growveld.Carrying;
 using Growveld.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -21,6 +22,7 @@ namespace Growveld.Interaction
 
         private InputAction interactAction;
         private IInteractable currentInteractable;
+        private PlayerCarryController carryController;
 
         private void Awake()
         {
@@ -31,13 +33,23 @@ namespace Growveld.Interaction
 
             PlayerInput playerInput = GetComponent<PlayerInput>();
             interactAction = playerInput.actions.FindAction("Player/Interact", true);
+            carryController = GetComponent<PlayerCarryController>();
         }
 
         private void Update()
         {
             FindInteractionTarget();
 
-            if (currentInteractable != null && interactAction.WasPressedThisFrame())
+            if (!interactAction.WasPressedThisFrame())
+            {
+                return;
+            }
+
+            if (carryController != null && carryController.IsCarrying)
+            {
+                carryController.DropHeldObject();
+            }
+            else if (currentInteractable != null)
             {
                 currentInteractable.Interact(gameObject);
             }
