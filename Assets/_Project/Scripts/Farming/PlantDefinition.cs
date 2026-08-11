@@ -15,6 +15,15 @@ namespace Growveld.Farming
         [SerializeField, Min(1f)] private float vegetativeSeconds = 540f;
         [SerializeField, Min(1f)] private float floweringSeconds = 900f;
         [SerializeField, Min(0.01f)] private float baseYieldKilograms = 0.45f;
+        [Header("Care")]
+        [SerializeField, Min(1f)] private float maximumWater = 100f;
+        [SerializeField, Min(1f)] private float maximumNutrients = 100f;
+        [SerializeField, Min(0f)] private float waterConsumptionPerRealMinute = 4f;
+        [SerializeField, Min(0f)] private float nutrientConsumptionPerRealMinute = 2f;
+        [SerializeField, Min(0f)] private float waterPerUse = 45f;
+        [SerializeField, Min(0f)] private float nutrientsPerDose = 35f;
+        [SerializeField, Min(0f)] private float healthLossPerCriticalMinute = 8f;
+        [SerializeField, Min(0f)] private float healthRecoveryPerGoodMinute = 2f;
 
         public string PlantId => plantId;
         public string DisplayName => displayName;
@@ -23,6 +32,14 @@ namespace Growveld.Farming
         public float VegetativeSeconds => vegetativeSeconds;
         public float FloweringSeconds => floweringSeconds;
         public float BaseYieldKilograms => baseYieldKilograms;
+        public float MaximumWater => maximumWater;
+        public float MaximumNutrients => maximumNutrients;
+        public float WaterConsumptionPerRealMinute => waterConsumptionPerRealMinute;
+        public float NutrientConsumptionPerRealMinute => nutrientConsumptionPerRealMinute;
+        public float WaterPerUse => waterPerUse;
+        public float NutrientsPerDose => nutrientsPerDose;
+        public float HealthLossPerCriticalMinute => healthLossPerCriticalMinute;
+        public float HealthRecoveryPerGoodMinute => healthRecoveryPerGoodMinute;
         public float TotalGrowthSeconds => germinationSeconds + seedlingSeconds + vegetativeSeconds + floweringSeconds;
 
         public float GetStageStartTime(PlantGrowthStage stage)

@@ -19,3 +19,11 @@ MonoBehaviour:
   vegetativeSeconds: 540
   floweringSeconds: 900
   baseYieldKilograms: 0.45
+  maximumWater: 100
+  maximumNutrients: 100
+  waterConsumptionPerRealMinute: 4
+  nutrientConsumptionPerRealMinute: 2
+  waterPerUse: 45
+  nutrientsPerDose: 35
+  healthLossPerCriticalMinute: 8
+  healthRecoveryPerGoodMinute: 2

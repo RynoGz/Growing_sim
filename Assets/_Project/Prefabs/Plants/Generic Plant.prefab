@@ -564,3 +564,6 @@ MonoBehaviour:
   elapsedGrowthSeconds: 0
   externalGrowthMultiplier: 1
   simulationEnabled: 1
+  waterLevel: 100
+  nutrientLevel: 100
+  health: 100
