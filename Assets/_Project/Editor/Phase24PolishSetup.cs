@@ -15,6 +15,8 @@ using UnityEditor;
 using UnityEditor.Build.Reporting;
 using UnityEditor.SceneManagement;
 using UnityEngine;
+using UnityEngine.EventSystems;
+using UnityEngine.InputSystem.UI;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
@@ -24,6 +26,7 @@ namespace Growveld.Editor
     {
         private const string ScenePath = "Assets/_Project/Scenes/PrototypeFarm.unity";
         private const string MaterialFolder = "Assets/_Project/Materials/Polish";
+        private static double tabletSmokeReadyAt;
 
         private static readonly string[] TestRootNames =
         {
@@ -58,6 +61,7 @@ namespace Growveld.Editor
             RemoveRoot(scene, "Pause UI");
 
             ResetCleanStartingState(scene, player, systems);
+            EnsureEventSystem(scene);
             CreatePolishedEnvironment(scene);
             ConfigurePolishedHUD(scene, player, systems);
             ConfigureFeedbackAudio(player, systems);
@@ -81,6 +85,84 @@ namespace Growveld.Editor
         {
             Scene scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
             ValidatePrototype(scene);
+        }
+
+        [MenuItem("Growveld/Phase 24/Repair Tablet Input")]
+        public static void RepairTabletInput()
+        {
+            Scene scene = EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+            EnsureEventSystem(scene);
+            EditorSceneManager.MarkSceneDirty(scene);
+            EditorSceneManager.SaveScene(scene, ScenePath);
+            AssetDatabase.SaveAssets();
+            ValidatePrototype(scene);
+            Debug.Log("Growveld tablet input repaired: EventSystem and Input System UI module are present and validated.");
+        }
+
+        [MenuItem("Growveld/Phase 24/Run Tablet Click Smoke Test %#F6")]
+        public static void RunTabletClickSmokeTest()
+        {
+            if (!EditorApplication.isPlaying)
+            {
+                Debug.LogWarning("Enter Play Mode before running the tablet click smoke test.");
+                return;
+            }
+
+            BusinessTabletController controller = UnityEngine.Object.FindFirstObjectByType<BusinessTabletController>();
+            if (controller == null)
+            {
+                throw new MissingReferenceException("Tablet click smoke-test references are incomplete.");
+            }
+
+            controller.SetOpen(true);
+            tabletSmokeReadyAt = EditorApplication.timeSinceStartup + 0.5d;
+            EditorApplication.update -= CompleteTabletClickSmokeTest;
+            EditorApplication.update += CompleteTabletClickSmokeTest;
+        }
+
+        private static void CompleteTabletClickSmokeTest()
+        {
+            if (!EditorApplication.isPlaying)
+            {
+                EditorApplication.update -= CompleteTabletClickSmokeTest;
+                return;
+            }
+
+            if (EditorApplication.timeSinceStartup < tabletSmokeReadyAt) return;
+            EditorApplication.update -= CompleteTabletClickSmokeTest;
+
+            EventSystem eventSystem = UnityEngine.Object.FindFirstObjectByType<EventSystem>();
+            InputSystemUIInputModule inputModule = eventSystem != null ? eventSystem.GetComponent<InputSystemUIInputModule>() : null;
+            BusinessTabletController controller = UnityEngine.Object.FindFirstObjectByType<BusinessTabletController>();
+            GameObject tabletCanvas = GameObject.Find("Business Tablet UI");
+            if (eventSystem == null || inputModule == null || controller == null || tabletCanvas == null)
+            {
+                throw new MissingReferenceException("Tablet click smoke-test references are incomplete.");
+            }
+
+            Transform shopTabTransform = tabletCanvas.transform.Find("Tablet/Shop Tab");
+            Transform shopSectionTransform = tabletCanvas.transform.Find("Tablet/Content/Shop");
+            if (shopTabTransform == null || shopSectionTransform == null) throw new MissingReferenceException("Shop tablet UI is incomplete.");
+            GameObject shopTab = shopTabTransform.gameObject;
+            GameObject shopSection = shopSectionTransform.gameObject;
+            RectTransform tabRect = shopTab.GetComponent<RectTransform>();
+            Button shopButton = shopTab.GetComponent<Button>();
+            Canvas.ForceUpdateCanvases();
+            Vector3 tabWorldCentre = tabRect.TransformPoint(tabRect.rect.center);
+            PointerEventData pointer = new(eventSystem)
+            {
+                position = RectTransformUtility.WorldToScreenPoint(null, tabWorldCentre),
+                button = PointerEventData.InputButton.Left
+            };
+            List<RaycastResult> hits = new();
+            eventSystem.RaycastAll(pointer, hits);
+            bool tabWasHit = hits.Any(hit => hit.gameObject != null && hit.gameObject.transform.IsChildOf(shopTab.transform));
+            if (!tabWasHit) throw new InvalidOperationException("The active EventSystem could not raycast the Shop tablet button.");
+
+            shopButton.onClick.Invoke();
+            if (!shopSection.activeSelf) throw new InvalidOperationException("The Shop tablet button received a click but did not change sections.");
+            controller.SetOpen(false);
+            Debug.Log($"Growveld tablet click smoke test passed: {hits.Count} UI raycast hits, Shop tab received a pointer click, and the Shop section opened.");
         }
 
         [MenuItem("Growveld/Phase 24/Toggle Pause-Help Smoke Test %#F7")]
@@ -153,6 +235,35 @@ namespace Growveld.Editor
             utilitySettings.FindProperty("fallbackDayElapsedSeconds").floatValue = 0f;
             utilitySettings.FindProperty("currentDay").intValue = 1;
             utilitySettings.ApplyModifiedPropertiesWithoutUndo();
+        }
+
+        private static void EnsureEventSystem(Scene scene)
+        {
+            EventSystem[] eventSystems = UnityEngine.Object.FindObjectsByType<EventSystem>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+            EventSystem eventSystem = eventSystems.FirstOrDefault(system => system.gameObject.scene == scene);
+            if (eventSystem == null)
+            {
+                GameObject eventSystemObject = new("EventSystem", typeof(EventSystem));
+                SceneManager.MoveGameObjectToScene(eventSystemObject, scene);
+                eventSystem = eventSystemObject.GetComponent<EventSystem>();
+            }
+
+            foreach (EventSystem duplicate in eventSystems)
+            {
+                if (duplicate != null && duplicate != eventSystem && duplicate.gameObject.scene == scene)
+                {
+                    UnityEngine.Object.DestroyImmediate(duplicate.gameObject);
+                }
+            }
+
+            StandaloneInputModule legacyModule = eventSystem.GetComponent<StandaloneInputModule>();
+            if (legacyModule != null) UnityEngine.Object.DestroyImmediate(legacyModule);
+            InputSystemUIInputModule inputModule = eventSystem.GetComponent<InputSystemUIInputModule>();
+            if (inputModule == null) inputModule = eventSystem.gameObject.AddComponent<InputSystemUIInputModule>();
+            eventSystem.sendNavigationEvents = true;
+            eventSystem.pixelDragThreshold = 10;
+            EditorUtility.SetDirty(eventSystem);
+            EditorUtility.SetDirty(inputModule);
         }
 
         private static void CreatePolishedEnvironment(Scene scene)
@@ -341,6 +452,9 @@ namespace Growveld.Editor
             if (UnityEngine.Object.FindObjectsByType<HarvestBatch>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length > 0) failures.Add("test harvest batches remain");
             if (UnityEngine.Object.FindObjectsByType<PlantingContainer>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length < 1) failures.Add("no planting positions found");
             if (FindRoot(scene, "Polished Environment") == null || FindRoot(scene, "Polish HUD") == null || FindRoot(scene, "Pause UI") == null) failures.Add("polish roots missing");
+            EventSystem eventSystem = UnityEngine.Object.FindFirstObjectByType<EventSystem>(FindObjectsInactive.Include);
+            if (eventSystem == null) failures.Add("UI EventSystem missing");
+            else if (eventSystem.GetComponent<InputSystemUIInputModule>() == null) failures.Add("Input System UI module missing");
 
             string[] itemGuids = AssetDatabase.FindAssets("t:ItemDefinition", new[] { "Assets/_Project/ScriptableObjects/Items" });
             string[] placeableGuids = AssetDatabase.FindAssets("t:PlaceableDefinition", new[] { "Assets/_Project/ScriptableObjects/Placeables" });
