@@ -4199,6 +4199,100 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 649095503}
   m_CullTransparentMesh: 1
+--- !u!1 &702244793
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 702244794}
+  - component: {fileID: 702244797}
+  - component: {fileID: 702244796}
+  - component: {fileID: 702244795}
+  m_Layer: 0
+  m_Name: Time and Day
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &702244794
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 702244793}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1120836232}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 1}
+  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchoredPosition: {x: 0, y: -24}
+  m_SizeDelta: {x: 540, y: 52}
+  m_Pivot: {x: 0.5, y: 1}
+--- !u!114 &702244795
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 702244793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 01df25519e6f8ec4f8a142384f8da10b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Growveld.UI.TimeHUD
+  gameTime: {fileID: 1278170516}
+  timeText: {fileID: 702244796}
+--- !u!114 &702244796
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 702244793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 25
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 10
+    m_MaxSize: 40
+    m_Alignment: 4
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: 
+--- !u!222 &702244797
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 702244793}
+  m_CullTransparentMesh: 1
 --- !u!1 &722405656
 GameObject:
   m_ObjectHideFlags: 0
@@ -6593,6 +6687,7 @@ RectTransform:
   - {fileID: 1538501691}
   - {fileID: 463763333}
   - {fileID: 311785107}
+  - {fileID: 702244794}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -7910,6 +8005,7 @@ GameObject:
   - component: {fileID: 1278170513}
   - component: {fileID: 1278170514}
   - component: {fileID: 1278170515}
+  - component: {fileID: 1278170516}
   m_Layer: 0
   m_Name: Game Systems
   m_TagString: Untagged
@@ -8003,6 +8099,7 @@ MonoBehaviour:
   deliveryDelayGameMinutes: 5
   realSecondsPerGameMinute: 1.25
   pendingDeliveries: []
+  gameTime: {fileID: 1278170516}
 --- !u!114 &1278170512
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8069,6 +8166,23 @@ MonoBehaviour:
   fallbackDayElapsedSeconds: 0
   currentDay: 1
   externalDayClockEnabled: 0
+--- !u!114 &1278170516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1278170506}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c22084c0bef0ec48a76aca2b949eee7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Growveld.Core.GameTimeManager
+  settings: {fileID: 11400000, guid: 3b2c156b2f0e75f4ba66f44d27e36096, type: 2}
+  sun: {fileID: 501646780}
+  utilities: {fileID: 1278170515}
+  day: 1
+  timeOfDayHours: 7
 --- !u!1 &1278498390
 GameObject:
   m_ObjectHideFlags: 0

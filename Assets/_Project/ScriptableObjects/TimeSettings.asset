@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c68b0409d0f0e94db10c2bff6a4309a, type: 3}
+  m_Name: TimeSettings
+  m_EditorClassIdentifier: Assembly-CSharp::Growveld.Core.TimeSettings
+  realSecondsPerFullDay: 1800
+  sunriseHour: 6
+  sunsetHour: 22
+  growLightOnHour: 4
+  growLightOffHour: 22
+  daytimeSunIntensity: 1.15
+  nightSunIntensity: 0.03

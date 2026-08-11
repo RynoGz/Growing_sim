@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Growveld.Inventory;
+using Growveld.Core;
 using UnityEngine;
 
 namespace Growveld.Economy
@@ -14,6 +15,7 @@ namespace Growveld.Economy
         [SerializeField, Min(0.1f)] private float deliveryDelayGameMinutes = 5f;
         [SerializeField, Min(0.05f)] private float realSecondsPerGameMinute = 1.25f;
         [SerializeField] private List<PendingDelivery> pendingDeliveries = new();
+        [SerializeField] private GameTimeManager gameTime;
 
         public event Action DeliveriesChanged;
         public event Action<PendingDelivery> DeliveryCompleted;
@@ -29,7 +31,9 @@ namespace Growveld.Economy
                 return;
             }
 
-            float elapsedGameMinutes = Time.deltaTime / realSecondsPerGameMinute;
+            float elapsedGameMinutes = gameTime != null
+                ? gameTime.GameMinutesAdvancedThisFrame
+                : Time.deltaTime / realSecondsPerGameMinute;
             bool changed = false;
 
             for (int index = pendingDeliveries.Count - 1; index >= 0; index--)
