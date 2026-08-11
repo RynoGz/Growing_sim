@@ -27,3 +27,4 @@ MonoBehaviour:
   nutrientsPerDose: 35
   healthLossPerCriticalMinute: 8
   healthRecoveryPerGoodMinute: 2
+  qualitySettings: {fileID: 11400000, guid: 974d0af09f4ed9c48af1fc90101e926c, type: 2}

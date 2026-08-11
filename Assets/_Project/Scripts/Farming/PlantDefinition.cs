@@ -24,6 +24,7 @@ namespace Growveld.Farming
         [SerializeField, Min(0f)] private float nutrientsPerDose = 35f;
         [SerializeField, Min(0f)] private float healthLossPerCriticalMinute = 8f;
         [SerializeField, Min(0f)] private float healthRecoveryPerGoodMinute = 2f;
+        [SerializeField] private QualitySettings qualitySettings;
 
         public string PlantId => plantId;
         public string DisplayName => displayName;
@@ -40,6 +41,7 @@ namespace Growveld.Farming
         public float NutrientsPerDose => nutrientsPerDose;
         public float HealthLossPerCriticalMinute => healthLossPerCriticalMinute;
         public float HealthRecoveryPerGoodMinute => healthRecoveryPerGoodMinute;
+        public QualitySettings QualitySettings => qualitySettings;
         public float TotalGrowthSeconds => germinationSeconds + seedlingSeconds + vegetativeSeconds + floweringSeconds;
 
         public float GetStageStartTime(PlantGrowthStage stage)

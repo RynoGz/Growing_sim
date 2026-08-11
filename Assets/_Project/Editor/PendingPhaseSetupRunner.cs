@@ -22,7 +22,7 @@ namespace Growveld.Editor
             EditorApplication.delayCall += RunPendingSetup;
         }
 
-        private static void RunPendingSetup()
+        internal static void RunPendingSetup()
         {
             string absolutePath = Path.GetFullPath(PendingSetupPath);
             if (!File.Exists(absolutePath))
@@ -65,6 +65,21 @@ namespace Growveld.Editor
             catch (TargetInvocationException exception)
             {
                 Debug.LogException(exception.InnerException ?? exception);
+            }
+        }
+    }
+
+    public sealed class PendingPhaseSetupAssetPostprocessor : AssetPostprocessor
+    {
+        private static void OnPostprocessAllAssets(
+            string[] importedAssets,
+            string[] deletedAssets,
+            string[] movedAssets,
+            string[] movedFromAssetPaths)
+        {
+            if (importedAssets.Contains("Assets/_Project/Editor/PendingPhaseSetup.txt"))
+            {
+                EditorApplication.delayCall += PendingPhaseSetupRunner.RunPendingSetup;
             }
         }
     }

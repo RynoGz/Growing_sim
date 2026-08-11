@@ -20,6 +20,10 @@ namespace Growveld.Farming
         [SerializeField, Range(0f, 100f)] private float waterLevel = 100f;
         [SerializeField, Range(0f, 100f)] private float nutrientLevel = 100f;
         [SerializeField, Range(0f, 100f)] private float health = 100f;
+        [SerializeField, Range(0f, 100f)] private float qualityScore = 100f;
+        [SerializeField, Range(0f, 2f)] private float yieldPotential = 1f;
+        [SerializeField, Min(0f)] private float accumulatedCareScore;
+        [SerializeField, Min(0f)] private float careSampleSeconds;
 
         private PlantGrowthStage currentStage;
         private PlantEnvironmentController environmentController;
@@ -37,6 +41,17 @@ namespace Growveld.Farming
         public float WaterLevel => waterLevel;
         public float NutrientLevel => nutrientLevel;
         public float Health => health;
+        public float QualityScore => qualityScore;
+        public float YieldPotential => yieldPotential;
+        public QualityGrade CurrentQualityGrade => definition != null && definition.QualitySettings != null
+            ? definition.QualitySettings.GetGrade(qualityScore)
+            : QualityGrade.Standard;
+        public float QualityPriceMultiplier => definition != null && definition.QualitySettings != null
+            ? definition.QualitySettings.GetPriceMultiplier(CurrentQualityGrade)
+            : 1f;
+        public float EstimatedYieldKilograms => definition != null
+            ? definition.BaseYieldKilograms * yieldPotential
+            : 0f;
         public string WaterStatus => FormatResourceStatus(waterLevel, definition != null ? definition.MaximumWater : 100f);
         public string NutrientStatus => FormatResourceStatus(nutrientLevel, definition != null ? definition.MaximumNutrients : 100f);
         public string InteractionPrompt => IsHarvestReady ? "Inspect harvest-ready plant" : "Care for plant (select watering can or nutrients)";
@@ -48,7 +63,10 @@ namespace Growveld.Farming
                 string environmentInfo = environmentController != null
                     ? $"\n{environmentController.ContextSummary}"
                     : string.Empty;
-                return $"{definition.DisplayName}\nStage: {FormatStage(currentStage)}\nGrowth: {GrowthPercent:0}%\nWater: {WaterStatus}\nNutrients: {NutrientStatus}\nHealth: {health:0}%{environmentInfo}";
+                string gradeName = definition.QualitySettings != null
+                    ? definition.QualitySettings.GetDisplayName(CurrentQualityGrade)
+                    : CurrentQualityGrade.ToString();
+                return $"{definition.DisplayName}\nStage: {FormatStage(currentStage)}\nGrowth: {GrowthPercent:0}%\nWater: {WaterStatus}\nNutrients: {NutrientStatus}\nHealth: {health:0}%\nQuality: {gradeName}\nYield potential: {yieldPotential * 100f:0}%{environmentInfo}";
             }
         }
 
@@ -66,6 +84,7 @@ namespace Growveld.Farming
             }
 
             SimulateCare(Time.deltaTime);
+            RecordCareSample(Time.deltaTime);
             float careMultiplier = CalculateCareGrowthMultiplier();
             if (health > 0f && externalGrowthMultiplier > 0f && careMultiplier > 0f)
             {
@@ -142,6 +161,21 @@ namespace Growveld.Farming
             health = Mathf.Clamp(restoredHealth, 0f, 100f);
         }
 
+        public void RestoreQuality(float restoredQualityScore, float restoredYieldPotential, float restoredAccumulatedScore, float restoredSampleSeconds)
+        {
+            qualityScore = Mathf.Clamp(restoredQualityScore, 0f, 100f);
+            yieldPotential = Mathf.Clamp(restoredYieldPotential, 0f, 2f);
+            accumulatedCareScore = Mathf.Max(0f, restoredAccumulatedScore);
+            careSampleSeconds = Mathf.Max(0f, restoredSampleSeconds);
+        }
+
+        public float CalculateHarvestYieldKilograms()
+        {
+            if (definition == null) return 0f;
+            float randomVariation = UnityEngine.Random.Range(0.95f, 1.05f);
+            return Mathf.Max(0.01f, definition.BaseYieldKilograms * yieldPotential * randomVariation);
+        }
+
         private void SimulateCare(float realSeconds)
         {
             float realMinutes = Mathf.Max(0f, realSeconds) / 60f;
@@ -170,6 +204,31 @@ namespace Growveld.Farming
             float waterMultiplier = waterRatio >= 0.35f ? 1f : Mathf.Lerp(0.25f, 0.75f, waterRatio / 0.35f);
             float nutrientMultiplier = nutrientRatio >= 0.35f ? 1f : Mathf.Lerp(0.35f, 0.8f, nutrientRatio / 0.35f);
             return Mathf.Min(waterMultiplier, nutrientMultiplier);
+        }
+
+        private void RecordCareSample(float realSeconds)
+        {
+            if (realSeconds <= 0f || definition == null)
+            {
+                return;
+            }
+
+            float waterRatio = definition.MaximumWater <= 0f ? 1f : waterLevel / definition.MaximumWater;
+            float nutrientRatio = definition.MaximumNutrients <= 0f ? 1f : nutrientLevel / definition.MaximumNutrients;
+            float healthRatio = health / 100f;
+            float environmentFactor = environmentController != null ? environmentController.QualityFactor : 0.8f;
+            float instantCareScore = Mathf.Clamp01(
+                waterRatio * 0.28f
+                + nutrientRatio * 0.28f
+                + healthRatio * 0.24f
+                + environmentFactor * 0.2f) * 100f;
+
+            accumulatedCareScore += instantCareScore * realSeconds;
+            careSampleSeconds += realSeconds;
+            qualityScore = careSampleSeconds <= 0f ? 100f : accumulatedCareScore / careSampleSeconds;
+
+            float careRatio = qualityScore / 100f;
+            yieldPotential = Mathf.Lerp(0.42f, 1.12f, careRatio);
         }
 
         public void RestoreGrowth(float restoredElapsedSeconds)

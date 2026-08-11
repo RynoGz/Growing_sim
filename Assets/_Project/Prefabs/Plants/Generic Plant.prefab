@@ -568,6 +568,10 @@ MonoBehaviour:
   waterLevel: 100
   nutrientLevel: 100
   health: 100
+  qualityScore: 100
+  yieldPotential: 1
+  accumulatedCareScore: 0
+  careSampleSeconds: 0
 --- !u!114 &5806213262338778122
 MonoBehaviour:
   m_ObjectHideFlags: 0

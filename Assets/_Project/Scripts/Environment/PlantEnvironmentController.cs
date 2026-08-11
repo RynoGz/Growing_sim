@@ -20,6 +20,27 @@ namespace Growveld.Environment
         public GrowRoomEnvironment CurrentRoom => currentRoom;
         public bool IsIndoor => currentRoom != null;
         public GrowLight CoveringLight => coveringLight;
+        public float QualityFactor
+        {
+            get
+            {
+                if (currentRoom != null)
+                {
+                    float humidityFactor = currentRoom.GetHumidityGrowthMultiplier() / 1.12f;
+                    return Mathf.Clamp01(humidityFactor) * (coveringLight != null ? 1f : 0.5f);
+                }
+
+                if (outdoorEnvironment != null)
+                {
+                    float growthFactor = outdoorEnvironment.IsDaylight
+                        ? outdoorEnvironment.GetGrowthMultiplier() / 0.78f
+                        : 1f;
+                    return 0.86f * Mathf.Clamp01(growthFactor);
+                }
+
+                return 0.8f;
+            }
+        }
         public string ContextSummary
         {
             get
