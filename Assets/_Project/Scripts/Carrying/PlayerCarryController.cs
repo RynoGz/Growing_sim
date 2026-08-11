@@ -74,6 +74,20 @@ namespace Growveld.Carrying
             HeldObjectChanged?.Invoke(null);
         }
 
+        public CarryableObject ReleaseHeldObjectForTransfer()
+        {
+            if (heldObject == null)
+            {
+                return null;
+            }
+
+            CarryableObject transferredObject = heldObject;
+            heldObject = null;
+            transferredObject.EndCarry(Vector3.zero);
+            HeldObjectChanged?.Invoke(null);
+            return transferredObject;
+        }
+
         internal void NotifyCarryableUnavailable(CarryableObject carryable)
         {
             if (heldObject != carryable)

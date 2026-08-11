@@ -31,7 +31,6 @@ namespace Growveld.Editor
             }
 
             string methodIdentifier = File.ReadAllText(absolutePath).Trim();
-            AssetDatabase.DeleteAsset(PendingSetupPath);
 
             int separatorIndex = methodIdentifier.LastIndexOf('.');
             if (separatorIndex <= 0 || separatorIndex >= methodIdentifier.Length - 1)
@@ -54,9 +53,11 @@ namespace Growveld.Editor
 
             if (method == null)
             {
-                Debug.LogError($"Pending setup method was not found: {methodIdentifier}");
+                Debug.Log($"Pending setup method is not compiled yet; Unity will retry after reload: {methodIdentifier}");
                 return;
             }
+
+            AssetDatabase.DeleteAsset(PendingSetupPath);
 
             try
             {

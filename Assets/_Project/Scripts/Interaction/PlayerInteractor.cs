@@ -51,7 +51,14 @@ namespace Growveld.Interaction
 
             if (carryController != null && carryController.IsCarrying)
             {
-                carryController.DropHeldObject();
+                if (currentInteractable is IHeldObjectReceiver)
+                {
+                    currentInteractable.Interact(gameObject);
+                }
+                else
+                {
+                    carryController.DropHeldObject();
+                }
             }
             else if (currentInteractable != null)
             {
@@ -73,18 +80,34 @@ namespace Growveld.Interaction
             }
 
             Ray interactionRay = new Ray(viewCamera.transform.position, viewCamera.transform.forward);
-            bool hitSomething = Physics.Raycast(
+            RaycastHit[] hits = Physics.RaycastAll(
                 interactionRay,
-                out RaycastHit hit,
                 interactionDistance,
                 interactionLayers,
                 QueryTriggerInteraction.Ignore);
+            System.Array.Sort(hits, (left, right) => left.distance.CompareTo(right.distance));
 
-            if (!hitSomething)
+            RaycastHit? selectedHit = null;
+            foreach (RaycastHit candidateHit in hits)
+            {
+                if (carryController != null
+                    && carryController.HeldObject != null
+                    && candidateHit.collider.transform.IsChildOf(carryController.HeldObject.transform))
+                {
+                    continue;
+                }
+
+                selectedHit = candidateHit;
+                break;
+            }
+
+            if (!selectedHit.HasValue)
             {
                 ClearInteractionTarget();
                 return;
             }
+
+            RaycastHit hit = selectedHit.Value;
 
             currentContextProvider = FindContextProvider(hit.collider);
 
