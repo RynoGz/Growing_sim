@@ -1,6 +1,7 @@
 using System;
 using Growveld.Interaction;
 using Growveld.Inventory;
+using Growveld.Environment;
 using UnityEngine;
 
 namespace Growveld.Farming
@@ -21,6 +22,7 @@ namespace Growveld.Farming
         [SerializeField, Range(0f, 100f)] private float health = 100f;
 
         private PlantGrowthStage currentStage;
+        private PlantEnvironmentController environmentController;
 
         public event Action<PlantGrowthStage> StageChanged;
 
@@ -38,12 +40,21 @@ namespace Growveld.Farming
         public string WaterStatus => FormatResourceStatus(waterLevel, definition != null ? definition.MaximumWater : 100f);
         public string NutrientStatus => FormatResourceStatus(nutrientLevel, definition != null ? definition.MaximumNutrients : 100f);
         public string InteractionPrompt => IsHarvestReady ? "Inspect harvest-ready plant" : "Care for plant (select watering can or nutrients)";
-        public string ContextualInfo => definition == null
-            ? "Plant data missing"
-            : $"{definition.DisplayName}\nStage: {FormatStage(currentStage)}\nGrowth: {GrowthPercent:0}%\nWater: {WaterStatus}\nNutrients: {NutrientStatus}\nHealth: {health:0}%";
+        public string ContextualInfo
+        {
+            get
+            {
+                if (definition == null) return "Plant data missing";
+                string environmentInfo = environmentController != null
+                    ? $"\n{environmentController.ContextSummary}"
+                    : string.Empty;
+                return $"{definition.DisplayName}\nStage: {FormatStage(currentStage)}\nGrowth: {GrowthPercent:0}%\nWater: {WaterStatus}\nNutrients: {NutrientStatus}\nHealth: {health:0}%{environmentInfo}";
+            }
+        }
 
         private void Awake()
         {
+            environmentController = GetComponent<PlantEnvironmentController>();
             RefreshStage(true);
         }
 

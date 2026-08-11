@@ -497,6 +497,7 @@ GameObject:
   - component: {fileID: 517668997663683060}
   - component: {fileID: 1136999128320883414}
   - component: {fileID: 2244491659409833220}
+  - component: {fileID: 5806213262338778122}
   m_Layer: 0
   m_Name: Generic Plant
   m_TagString: Untagged
@@ -567,3 +568,16 @@ MonoBehaviour:
   waterLevel: 100
   nutrientLevel: 100
   health: 100
+--- !u!114 &5806213262338778122
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8043868304584446466}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: adbe3fe7e9c11494f8dbfc1ebfa832bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Growveld.Environment.PlantEnvironmentController
+  refreshInterval: 0.5
