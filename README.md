@@ -8,7 +8,7 @@ Growveld is a first-person farming and business simulator prototype set in a fic
 - Render pipeline: Universal Render Pipeline (URP)
 - Input: Unity Input System
 - Initial platform: Windows, keyboard and mouse
-- Current milestone: Phase 5 - inventory and hotbar
+- Current milestone: Phase 6 - economy foundation
 
 ## Current controls
 
