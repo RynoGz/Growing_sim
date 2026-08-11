@@ -24,6 +24,8 @@ namespace Growveld.Interaction
         private IInteractable currentInteractable;
         private PlayerCarryController carryController;
 
+        public IInteractable CurrentInteractable => currentInteractable;
+
         private void Awake()
         {
             if (viewCamera == null)
@@ -82,8 +84,8 @@ namespace Growveld.Interaction
                 return;
             }
 
-            IInteractable interactable = hit.collider.GetComponentInParent<IInteractable>();
-            if (interactable == null || !interactable.CanInteract(gameObject))
+            IInteractable interactable = FindFirstAvailableInteractable(hit.collider);
+            if (interactable == null)
             {
                 ClearInteractionTarget();
                 return;
@@ -91,6 +93,20 @@ namespace Growveld.Interaction
 
             currentInteractable = interactable;
             promptUI?.ShowPrompt($"[E] {interactable.InteractionPrompt}");
+        }
+
+        private IInteractable FindFirstAvailableInteractable(Collider hitCollider)
+        {
+            MonoBehaviour[] behaviours = hitCollider.GetComponentsInParent<MonoBehaviour>(true);
+            foreach (MonoBehaviour behaviour in behaviours)
+            {
+                if (behaviour is IInteractable interactable && interactable.CanInteract(gameObject))
+                {
+                    return interactable;
+                }
+            }
+
+            return null;
         }
 
         private void ClearInteractionTarget()

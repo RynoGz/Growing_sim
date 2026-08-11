@@ -27,9 +27,24 @@ namespace Growveld.Building
 
         public bool CanInteract(GameObject interactor)
         {
-            return definition != null
-                && interactor.TryGetComponent(out PlacementController placementController)
-                && !placementController.IsPlacing;
+            if (definition == null
+                || !interactor.TryGetComponent(out PlacementController placementController)
+                || placementController.IsPlacing)
+            {
+                return false;
+            }
+
+            foreach (MonoBehaviour behaviour in GetComponents<MonoBehaviour>())
+            {
+                if (behaviour != this
+                    && behaviour is IInteractable otherInteraction
+                    && otherInteraction.CanInteract(interactor))
+                {
+                    return false;
+                }
+            }
+
+            return true;
         }
 
         public void Interact(GameObject interactor)
