@@ -122,6 +122,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8000057737917973284}
   - component: {fileID: 9112324094023946132}
+  - component: {fileID: 6946474030790853488}
   m_Layer: 0
   m_Name: Storage Bin
   m_TagString: Untagged
@@ -159,3 +160,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Growveld.Building.PlacedObject
   definition: {fileID: 11400000, guid: c5bdfdf5e21c9534aaa4165fe6079544, type: 2}
   persistentId: 
+--- !u!114 &6946474030790853488
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6217627013481599097}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1e2056d188992cb4dba90776c6e02d43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Growveld.Farming.StorageContainer
+  farmStock: {fileID: 0}
+  capacityKilograms: 25
+  storedKilograms: 0
