@@ -3,6 +3,12 @@ using UnityEngine;
 
 namespace Growveld.Building
 {
+    public enum PlacementSurface
+    {
+        Floor,
+        Ceiling
+    }
+
     /// <summary>
     /// Construction-specific data for an inventory item that can become a world object.
     /// </summary>
@@ -14,6 +20,7 @@ namespace Growveld.Building
         [SerializeField] private GameObject prefab;
         [SerializeField] private Vector3 footprintSize = Vector3.one;
         [SerializeField] private Vector3 placementOffset;
+        [SerializeField] private PlacementSurface placementSurface;
         [SerializeField, Range(1f, 90f)] private float rotationStep = 15f;
         [SerializeField, Range(0f, 1f)] private float sellRefundFraction = 0.7f;
         [SerializeField, Min(0f)] private float lightCoverageRadius;
@@ -23,6 +30,7 @@ namespace Growveld.Building
         public GameObject Prefab => prefab;
         public Vector3 FootprintSize => footprintSize;
         public Vector3 PlacementOffset => placementOffset;
+        public PlacementSurface PlacementSurface => placementSurface;
         public float RotationStep => rotationStep;
         public float SellRefundFraction => sellRefundFraction;
         public float LightCoverageRadius => lightCoverageRadius;

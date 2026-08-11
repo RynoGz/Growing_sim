@@ -22,11 +22,11 @@ namespace Growveld.Inventory
         {
             if (Keyboard.current != null)
             {
-                if (Keyboard.current.digit1Key.wasPressedThisFrame) inventory.SelectSlot(0);
-                if (Keyboard.current.digit2Key.wasPressedThisFrame) inventory.SelectSlot(1);
-                if (Keyboard.current.digit3Key.wasPressedThisFrame) inventory.SelectSlot(2);
-                if (Keyboard.current.digit4Key.wasPressedThisFrame) inventory.SelectSlot(3);
-                if (Keyboard.current.digit5Key.wasPressedThisFrame) inventory.SelectSlot(4);
+                if (Keyboard.current.digit1Key.wasPressedThisFrame) inventory.SelectHotbarSlot(0, visibleSlotCount);
+                if (Keyboard.current.digit2Key.wasPressedThisFrame) inventory.SelectHotbarSlot(1, visibleSlotCount);
+                if (Keyboard.current.digit3Key.wasPressedThisFrame) inventory.SelectHotbarSlot(2, visibleSlotCount);
+                if (Keyboard.current.digit4Key.wasPressedThisFrame) inventory.SelectHotbarSlot(3, visibleSlotCount);
+                if (Keyboard.current.digit5Key.wasPressedThisFrame) inventory.SelectHotbarSlot(4, visibleSlotCount);
             }
 
             if (Mouse.current == null)
@@ -40,10 +40,8 @@ namespace Growveld.Inventory
                 return;
             }
 
-            int slotCount = Mathf.Min(visibleSlotCount, inventory.Capacity);
             int direction = scroll > 0f ? -1 : 1;
-            int nextIndex = (inventory.SelectedSlotIndex + direction + slotCount) % slotCount;
-            inventory.SelectSlot(nextIndex);
+            inventory.CycleHotbarSelection(direction, visibleSlotCount);
         }
     }
 }

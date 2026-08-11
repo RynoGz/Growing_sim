@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using Growveld.Economy;
 using Growveld.Inventory;
+using Growveld.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Growveld.Building
 {
     /// <summary>
-    /// Centre-screen construction mode for placing, moving, and selling prefab equipment.
+    /// Centre-screen placement engine for new and existing prefab equipment.
     /// </summary>
     public sealed class PlacementController : MonoBehaviour
     {
@@ -27,6 +28,7 @@ namespace Growveld.Building
         private PlacedObject movingObject;
         private float placementYaw;
         private bool placementValid;
+        private ConstructionModeController constructionMode;
 
         public event Action<bool> PlacementModeChanged;
         public event Action<PlaceableDefinition, bool, bool> PreviewChanged;
@@ -40,6 +42,7 @@ namespace Growveld.Building
         {
             if (viewCamera == null) viewCamera = GetComponentInChildren<Camera>(true);
             if (inventory == null) inventory = GetComponent<PlayerInventory>();
+            constructionMode = GetComponent<ConstructionModeController>();
         }
 
         private void Update()
@@ -47,14 +50,7 @@ namespace Growveld.Building
             Keyboard keyboard = Keyboard.current;
             Mouse mouse = Mouse.current;
 
-            if (!IsPlacing)
-            {
-                if (keyboard != null && keyboard.bKey.wasPressedThisFrame)
-                {
-                    BeginSelectedPlacement();
-                }
-                return;
-            }
+            if (!IsPlacing) return;
 
             if (keyboard != null && keyboard.rKey.wasPressedThisFrame)
             {
@@ -62,12 +58,6 @@ namespace Growveld.Building
             }
 
             UpdatePreview();
-
-            if (keyboard != null && keyboard.escapeKey.wasPressedThisFrame)
-            {
-                CancelPlacement();
-                return;
-            }
 
             if (keyboard != null && keyboard.deleteKey.wasPressedThisFrame && IsMovingExisting)
             {
@@ -81,25 +71,31 @@ namespace Growveld.Building
             }
         }
 
-        public bool BeginSelectedPlacement()
+        public bool BeginInventoryPlacement(ItemDefinition item)
         {
             if (economy != null && !economy.CanMakePurchases)
             {
                 return false;
             }
 
-            InventorySlot selectedSlot = inventory != null ? inventory.SelectedSlot : null;
-            if (selectedSlot == null || selectedSlot.IsEmpty || selectedSlot.Item.PlaceableDefinition == null)
+            if (inventory == null
+                || item == null
+                || item.PlaceableDefinition == null
+                || inventory.Count(item) <= 0)
             {
                 return false;
             }
 
-            return BeginPlacement(selectedSlot.Item.PlaceableDefinition, null);
+            return BeginPlacement(item.PlaceableDefinition, null);
         }
 
         public bool BeginMove(PlacedObject placedObject)
         {
-            if (placedObject == null || placedObject.Definition == null || IsPlacing)
+            if (placedObject == null
+                || placedObject.Definition == null
+                || IsPlacing
+                || constructionMode == null
+                || !constructionMode.IsActive)
             {
                 return false;
             }
@@ -200,6 +196,14 @@ namespace Growveld.Building
                 return;
             }
 
+            if (!IsValidSurface(hit.normal))
+            {
+                placementValid = false;
+                SetPreviewAppearance(false);
+                PreviewChanged?.Invoke(activeDefinition, false, IsMovingExisting);
+                return;
+            }
+
             Vector3 position = hit.point + activeDefinition.PlacementOffset;
             position.x = Mathf.Round(position.x / gridSize) * gridSize;
             position.z = Mathf.Round(position.z / gridSize) * gridSize;
@@ -219,7 +223,10 @@ namespace Growveld.Building
                 Mathf.Abs(Mathf.Cos(radians)) * size.x + Mathf.Abs(Mathf.Sin(radians)) * size.z,
                 size.y,
                 Mathf.Abs(Mathf.Sin(radians)) * size.x + Mathf.Abs(Mathf.Cos(radians)) * size.z);
-            Bounds footprint = new(position + Vector3.up * (size.y * 0.5f), rotatedSize);
+            Vector3 verticalDirection = activeDefinition.PlacementSurface == PlacementSurface.Ceiling
+                ? Vector3.down
+                : Vector3.up;
+            Bounds footprint = new(position + verticalDirection * (size.y * 0.5f), rotatedSize);
             if (landManager == null || !landManager.IsFootprintOwned(footprint))
             {
                 return false;
@@ -229,7 +236,7 @@ namespace Growveld.Building
             halfExtents.x = Mathf.Max(0.05f, halfExtents.x - 0.04f);
             halfExtents.y = Mathf.Max(0.05f, halfExtents.y - 0.08f);
             halfExtents.z = Mathf.Max(0.05f, halfExtents.z - 0.04f);
-            Vector3 centre = position + Vector3.up * (size.y * 0.5f + 0.08f);
+            Vector3 centre = position + verticalDirection * (size.y * 0.5f + 0.08f);
             Collider[] overlaps = Physics.OverlapBox(
                 centre,
                 halfExtents,
@@ -297,6 +304,34 @@ namespace Growveld.Building
             Destroy(movingObject.gameObject);
             movingObject = null;
             FinishPlacementMode();
+        }
+
+        public bool SellPlacedObject(PlacedObject placedObject)
+        {
+            if (placedObject == null
+                || placedObject.Definition == null
+                || IsPlacing
+                || constructionMode == null
+                || !constructionMode.IsActive)
+            {
+                return false;
+            }
+
+            PlaceableDefinition definition = placedObject.Definition;
+            float refund = definition.PurchasePrice * definition.SellRefundFraction;
+            if (refund > 0f) economy?.Credit(refund, $"Sold {definition.DisplayName}");
+            Destroy(placedObject.gameObject);
+            GameplayMessageUI.Show($"Sold {definition.DisplayName} for R{refund:N0}");
+            return true;
+        }
+
+        private bool IsValidSurface(Vector3 surfaceNormal)
+        {
+            return activeDefinition.PlacementSurface switch
+            {
+                PlacementSurface.Ceiling => Vector3.Dot(surfaceNormal, Vector3.down) >= 0.72f,
+                _ => Vector3.Dot(surfaceNormal, Vector3.up) >= 0.72f
+            };
         }
 
         private void FinishPlacementMode()

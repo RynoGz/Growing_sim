@@ -10,7 +10,7 @@ namespace Growveld.Inventory
     /// </summary>
     public sealed class PlayerInventory : MonoBehaviour
     {
-        [SerializeField, Min(1)] private int capacity = 8;
+        [SerializeField, Min(1)] private int capacity = 24;
         [SerializeField] private List<InventorySlot> slots = new();
         [SerializeField, Min(0)] private int selectedSlotIndex;
 
@@ -103,6 +103,7 @@ namespace Growveld.Inventory
             }
 
             InventoryChanged?.Invoke();
+            EnsureHotbarSelection();
             return true;
         }
 
@@ -133,6 +134,7 @@ namespace Growveld.Inventory
             }
 
             InventoryChanged?.Invoke();
+            EnsureHotbarSelection();
             return true;
         }
 
@@ -163,6 +165,56 @@ namespace Growveld.Inventory
             SelectionChanged?.Invoke(selectedSlotIndex);
         }
 
+        public int GetHotbarSlotIndex(int hotbarIndex, int visibleSlotCount = 5)
+        {
+            EnsureCapacity();
+            int eligibleIndex = 0;
+            for (int slotIndex = 0; slotIndex < slots.Count; slotIndex++)
+            {
+                InventorySlot slot = slots[slotIndex];
+                if (!IsHotbarEligible(slot)) continue;
+                if (eligibleIndex == hotbarIndex) return slotIndex;
+                eligibleIndex++;
+                if (eligibleIndex >= visibleSlotCount) break;
+            }
+
+            return -1;
+        }
+
+        public int GetSelectedHotbarIndex(int visibleSlotCount = 5)
+        {
+            for (int hotbarIndex = 0; hotbarIndex < visibleSlotCount; hotbarIndex++)
+            {
+                if (GetHotbarSlotIndex(hotbarIndex, visibleSlotCount) == selectedSlotIndex) return hotbarIndex;
+            }
+
+            return -1;
+        }
+
+        public bool SelectHotbarSlot(int hotbarIndex, int visibleSlotCount = 5)
+        {
+            int slotIndex = GetHotbarSlotIndex(hotbarIndex, visibleSlotCount);
+            if (slotIndex < 0) return false;
+            SelectSlot(slotIndex);
+            return true;
+        }
+
+        public bool CycleHotbarSelection(int direction, int visibleSlotCount = 5)
+        {
+            int eligibleCount = 0;
+            while (eligibleCount < visibleSlotCount && GetHotbarSlotIndex(eligibleCount, visibleSlotCount) >= 0)
+            {
+                eligibleCount++;
+            }
+
+            if (eligibleCount == 0) return false;
+            int current = GetSelectedHotbarIndex(visibleSlotCount);
+            int next = current < 0
+                ? 0
+                : (current + direction + eligibleCount) % eligibleCount;
+            return SelectHotbarSlot(next, visibleSlotCount);
+        }
+
         public void ClearAll()
         {
             EnsureCapacity();
@@ -188,6 +240,7 @@ namespace Growveld.Inventory
         public void NotifyRestored()
         {
             EnsureCapacity();
+            EnsureHotbarSelection();
             InventoryChanged?.Invoke();
             SelectionChanged?.Invoke(selectedSlotIndex);
         }
@@ -207,6 +260,24 @@ namespace Growveld.Inventory
             }
 
             selectedSlotIndex = Mathf.Clamp(selectedSlotIndex, 0, slots.Count - 1);
+        }
+
+        private static bool IsHotbarEligible(InventorySlot slot)
+        {
+            return slot != null
+                && !slot.IsEmpty
+                && slot.Item.PlaceableDefinition == null;
+        }
+
+        private void EnsureHotbarSelection()
+        {
+            InventorySlot selected = SelectedSlot;
+            if (IsHotbarEligible(selected)) return;
+
+            int firstEligible = GetHotbarSlotIndex(0);
+            if (firstEligible < 0 || selectedSlotIndex == firstEligible) return;
+            selectedSlotIndex = firstEligible;
+            SelectionChanged?.Invoke(selectedSlotIndex);
         }
     }
 }

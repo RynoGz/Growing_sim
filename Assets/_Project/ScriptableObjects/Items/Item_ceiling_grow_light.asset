@@ -10,15 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 1309d2c43fd34f54ab783938f2a7a3b6, type: 3}
-  m_Name: Item_grow_light
+  m_Name: Item_ceiling_grow_light
   m_EditorClassIdentifier: Assembly-CSharp::Growveld.Inventory.ItemDefinition
-  itemId: grow_light
-  displayName: Grow Light
-  description: Floor grow light with six-metre plant coverage and automatic scheduling.
+  itemId: ceiling_grow_light
+  displayName: Ceiling Grow Light
+  description: Ceiling-mounted grow light with six-metre plant coverage.
   category: 2
-  stackable: 0
-  maximumStack: 1
-  purchasePrice: 3200
+  stackable: 1
+  maximumStack: 20
+  purchasePrice: 3600
   displayColor: {r: 0.72, g: 0.82, b: 1, a: 1}
   icon: {fileID: 0}
-  placeableDefinition: {fileID: 11400000, guid: 16e857f90c0a4a9499b6c42c7ac0dece, type: 2}
+  placeableDefinition: {fileID: 11400000, guid: 467e1c264e1aded4681d2b86eb786f57, type: 2}

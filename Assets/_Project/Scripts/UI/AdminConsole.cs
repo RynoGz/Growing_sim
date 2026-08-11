@@ -127,6 +127,7 @@ namespace Growveld.UI
             Suspend(FindFirstObjectByType<PlayerInteractor>());
             Suspend(FindFirstObjectByType<InventoryHotbarInput>());
             Suspend(FindFirstObjectByType<PlacementController>());
+            Suspend(FindFirstObjectByType<ConstructionModeController>());
             Suspend(FindFirstObjectByType<BusinessTabletController>());
             Suspend(FindFirstObjectByType<PauseAndHelpController>());
         }

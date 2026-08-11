@@ -52,18 +52,19 @@ namespace Growveld.UI
                     continue;
                 }
 
-                InventorySlot slot = index < inventory.Slots.Count ? inventory.Slots[index] : null;
+                int slotIndex = inventory.GetHotbarSlotIndex(index, slotLabels.Length);
+                InventorySlot slot = slotIndex >= 0 ? inventory.Slots[slotIndex] : null;
                 string itemText = slot == null || slot.IsEmpty
                     ? "Empty"
                     : $"{slot.Item.DisplayName}\nx{slot.Quantity}";
-                string selectionMarker = index == inventory.SelectedSlotIndex ? ">" : string.Empty;
+                string selectionMarker = slotIndex == inventory.SelectedSlotIndex ? ">" : string.Empty;
                 slotLabels[index].text = $"{selectionMarker}[{index + 1}]\n{itemText}";
             }
 
             if (heldItemLabel != null)
             {
                 InventorySlot selectedSlot = inventory.SelectedSlot;
-                heldItemLabel.text = selectedSlot == null || selectedSlot.IsEmpty
+                heldItemLabel.text = selectedSlot == null || selectedSlot.IsEmpty || selectedSlot.Item.PlaceableDefinition != null
                     ? "Selected: Empty"
                     : $"Selected: {selectedSlot.Item.DisplayName} x{selectedSlot.Quantity}";
             }

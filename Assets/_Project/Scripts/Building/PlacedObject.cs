@@ -14,8 +14,8 @@ namespace Growveld.Building
         public PlaceableDefinition Definition => definition;
         public string PersistentId => persistentId;
         public string InteractionPrompt => definition == null
-            ? "Move placed object"
-            : $"Move {definition.DisplayName}";
+            ? "Move placed object  |  [Delete] Sell"
+            : $"Move {definition.DisplayName}  |  [Delete] Sell R{definition.PurchasePrice * definition.SellRefundFraction:N0}";
 
         private void Awake()
         {
@@ -28,22 +28,13 @@ namespace Growveld.Building
         public bool CanInteract(GameObject interactor)
         {
             if (definition == null
+                || !interactor.TryGetComponent(out ConstructionModeController constructionMode)
+                || !constructionMode.IsActive
                 || !interactor.TryGetComponent(out PlacementController placementController)
                 || placementController.IsPlacing)
             {
                 return false;
             }
-
-            foreach (MonoBehaviour behaviour in GetComponents<MonoBehaviour>())
-            {
-                if (behaviour != this
-                    && behaviour is IInteractable otherInteraction
-                    && otherInteraction.CanInteract(interactor))
-                {
-                    return false;
-                }
-            }
-
             return true;
         }
 

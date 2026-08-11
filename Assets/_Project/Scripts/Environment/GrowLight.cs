@@ -10,9 +10,14 @@ namespace Growveld.Environment
     {
         private static readonly List<GrowLight> ActiveLights = new();
 
-        [SerializeField, Min(0.1f)] private float coverageRadius = 3.5f;
+        [SerializeField, Min(0.1f)] private float coverageRadius = 6f;
         [SerializeField, Min(0f)] private float powerConsumptionKilowatts = 1.2f;
         [SerializeField] private Light lightSource;
+        [SerializeField, Min(0f)] private float visualIntensity = 300f;
+        [SerializeField, Min(0.1f)] private float visualRange = 8f;
+        [SerializeField] private Color visualColor = new(0.72f, 0.82f, 1f, 1f);
+        [SerializeField] private LightType visualLightType = LightType.Point;
+        [SerializeField, Range(1f, 179f)] private float spotAngle = 110f;
         [SerializeField] private bool automaticSchedule = true;
         [SerializeField, Min(1f)] private float fallbackCycleRealSeconds = 1800f;
         [SerializeField, Min(0f)] private float fallbackActiveRealSeconds = 1200f;
@@ -23,11 +28,30 @@ namespace Growveld.Environment
 
         public float CoverageRadius => coverageRadius;
         public float PowerConsumptionKilowatts => powerConsumptionKilowatts;
+        public float VisualIntensity => visualIntensity;
+        public float VisualRange => visualRange;
+        public Color VisualColor => visualColor;
+        public Light LightSource => lightSource;
+        public LightType VisualLightType => visualLightType;
         public GrowRoomEnvironment CurrentRoom => currentRoom;
         public bool IsActive { get; private set; }
 
+        private void Awake()
+        {
+            ResolveAndConfigureLight();
+        }
+
+        private void OnValidate()
+        {
+            coverageRadius = Mathf.Max(0.1f, coverageRadius);
+            visualIntensity = Mathf.Max(0f, visualIntensity);
+            visualRange = Mathf.Max(0.1f, visualRange);
+            ResolveAndConfigureLight();
+        }
+
         private void OnEnable()
         {
+            ResolveAndConfigureLight();
             if (!ActiveLights.Contains(this)) ActiveLights.Add(this);
             RefreshState();
         }
@@ -90,6 +114,7 @@ namespace Growveld.Environment
 
         private void RefreshState()
         {
+            ResolveAndConfigureLight();
             bool scheduledActive;
             if (externalScheduleEnabled)
             {
@@ -107,6 +132,20 @@ namespace Growveld.Environment
 
             IsActive = isActiveAndEnabled && scheduledActive;
             if (lightSource != null) lightSource.enabled = IsActive;
+        }
+
+        private void ResolveAndConfigureLight()
+        {
+            if (lightSource == null) lightSource = GetComponentInChildren<Light>(true);
+            if (lightSource == null) return;
+
+            if (!lightSource.gameObject.activeSelf) lightSource.gameObject.SetActive(true);
+            lightSource.color = visualColor;
+            lightSource.intensity = visualIntensity;
+            lightSource.range = visualRange;
+            lightSource.type = visualLightType;
+            if (visualLightType == LightType.Spot) lightSource.spotAngle = spotAngle;
+            lightSource.useColorTemperature = false;
         }
     }
 }

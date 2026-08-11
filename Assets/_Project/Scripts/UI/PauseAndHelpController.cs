@@ -18,6 +18,7 @@ namespace Growveld.UI
         [SerializeField] private Behaviour[] gameplayBehaviours;
         [SerializeField] private BusinessTabletController tabletController;
         [SerializeField] private PlacementController placementController;
+        [SerializeField] private ConstructionModeController constructionMode;
 
         private float previousTimeScale = 1f;
 
@@ -45,6 +46,15 @@ namespace Growveld.UI
             if (!Keyboard.current.escapeKey.wasPressedThisFrame) return;
             if (!IsPaused && (tabletController != null && tabletController.IsOpen)) return;
             if (!IsPaused && (placementController != null && placementController.IsPlacing)) return;
+            if (!IsPaused && constructionMode != null)
+            {
+                if (constructionMode.IsActive)
+                {
+                    constructionMode.ExitMode();
+                    return;
+                }
+                if (constructionMode.LastExitFrame == Time.frameCount) return;
+            }
 
             if (IsPaused && controlsRoot != null && controlsRoot.activeSelf)
             {
@@ -78,6 +88,7 @@ namespace Growveld.UI
             {
                 tabletController?.SetOpen(false);
                 placementController?.CancelPlacement();
+                constructionMode?.ExitMode();
                 previousTimeScale = Time.timeScale > 0f ? Time.timeScale : 1f;
                 Time.timeScale = 0f;
             }

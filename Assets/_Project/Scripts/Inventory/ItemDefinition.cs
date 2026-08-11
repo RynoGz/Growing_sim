@@ -28,6 +28,7 @@ namespace Growveld.Inventory
         [SerializeField, Min(1)] private int maximumStack = 20;
         [SerializeField, Min(0f)] private float purchasePrice;
         [SerializeField] private Color displayColor = Color.white;
+        [SerializeField] private Sprite icon;
         [SerializeField] private PlaceableDefinition placeableDefinition;
 
         public string ItemId => itemId;
@@ -38,6 +39,7 @@ namespace Growveld.Inventory
         public int MaximumStack => stackable ? Mathf.Max(1, maximumStack) : 1;
         public float PurchasePrice => purchasePrice;
         public Color DisplayColor => displayColor;
+        public Sprite Icon => icon;
         public PlaceableDefinition PlaceableDefinition => placeableDefinition;
     }
 }

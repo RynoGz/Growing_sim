@@ -1,4 +1,5 @@
 using Growveld.Carrying;
+using Growveld.Building;
 using Growveld.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -24,6 +25,7 @@ namespace Growveld.Interaction
         private IInteractable currentInteractable;
         private IContextualInfoProvider currentContextProvider;
         private PlayerCarryController carryController;
+        private ConstructionModeController constructionMode;
 
         public IInteractable CurrentInteractable => currentInteractable;
         public IContextualInfoProvider CurrentContextProvider => currentContextProvider;
@@ -38,6 +40,7 @@ namespace Growveld.Interaction
             PlayerInput playerInput = GetComponent<PlayerInput>();
             interactAction = playerInput.actions.FindAction("Player/Interact", true);
             carryController = GetComponent<PlayerCarryController>();
+            constructionMode = GetComponent<ConstructionModeController>();
         }
 
         private void Update()
@@ -51,7 +54,7 @@ namespace Growveld.Interaction
 
             if (carryController != null && carryController.IsCarrying)
             {
-                if (currentInteractable is IHeldObjectReceiver)
+                if (currentInteractable is IHeldObjectReceiver or IInteractionWhileCarrying)
                 {
                     currentInteractable.Interact(gameObject);
                 }
@@ -109,7 +112,9 @@ namespace Growveld.Interaction
 
             RaycastHit hit = selectedHit.Value;
 
-            currentContextProvider = FindContextProvider(hit.collider);
+            currentContextProvider = constructionMode != null && constructionMode.IsActive
+                ? null
+                : FindContextProvider(hit.collider);
 
             IInteractable interactable = FindFirstAvailableInteractable(hit.collider);
             if (interactable == null)
@@ -129,6 +134,8 @@ namespace Growveld.Interaction
             {
                 if (behaviour is IInteractable interactable && interactable.CanInteract(gameObject))
                 {
+                    bool isConstructionInteraction = interactable is PlacedObject;
+                    if (constructionMode != null && constructionMode.IsActive != isConstructionInteraction) continue;
                     return interactable;
                 }
             }

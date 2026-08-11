@@ -190,7 +190,7 @@ namespace Growveld.Saving
         {
             foreach (PlacedObject placed in FindObjectsByType<PlacedObject>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
             {
-                if (placed.Definition == null) continue;
+                if (!placed.enabled || placed.Definition == null) continue;
                 data.placedObjects.Add(new PlacedObjectSaveData
                 {
                     persistentId = placed.PersistentId,

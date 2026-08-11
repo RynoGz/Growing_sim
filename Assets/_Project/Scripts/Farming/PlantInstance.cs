@@ -3,6 +3,8 @@ using Growveld.Interaction;
 using Growveld.Inventory;
 using Growveld.Environment;
 using Growveld.Economy;
+using Growveld.Carrying;
+using Growveld.UI;
 using UnityEngine;
 
 namespace Growveld.Farming
@@ -10,7 +12,7 @@ namespace Growveld.Farming
     /// <summary>
     /// Runtime state for one plant. Care and environment modifiers plug into its growth multiplier.
     /// </summary>
-    public sealed class PlantInstance : MonoBehaviour, IInteractable, IContextualInfoProvider
+    public sealed class PlantInstance : MonoBehaviour, IInteractable, IContextualInfoProvider, IInteractionWhileCarrying
     {
         [SerializeField] private PlantDefinition definition;
         [SerializeField] private GameObject[] stageVisuals;
@@ -107,7 +109,7 @@ namespace Growveld.Farming
         {
             if (IsHarvestReady)
             {
-                Harvest();
+                Harvest(interactor);
                 return;
             }
 
@@ -137,17 +139,45 @@ namespace Growveld.Farming
 
         public HarvestBatch Harvest()
         {
+            return Harvest(null);
+        }
+
+        public HarvestBatch Harvest(GameObject harvester)
+        {
             if (!IsHarvestReady || harvestBatchPrefab == null)
             {
                 return null;
             }
 
-            Vector3 spawnPosition = transform.position + transform.forward * 0.8f + Vector3.up * 0.45f;
+            PlayerCarryController carryController = null;
+            if (harvester != null)
+            {
+                if (!harvester.TryGetComponent(out carryController) || carryController.IsCarrying)
+                {
+                    GameplayMessageUI.Show("Your hands are full.");
+                    return null;
+                }
+            }
+
+            Vector3 spawnPosition = harvester != null
+                ? transform.position
+                : transform.position + transform.forward * 0.8f + Vector3.up * 0.45f;
             GameObject batchObject = Instantiate(harvestBatchPrefab, spawnPosition, Quaternion.identity);
             HarvestBatch batch = batchObject.GetComponent<HarvestBatch>();
             if (batch != null)
             {
                 batch.Initialise(CalculateHarvestYieldKilograms(), CurrentQualityGrade, HarvestStatus.Fresh);
+            }
+
+            if (carryController != null)
+            {
+                CarryableObject carryable = batchObject.GetComponent<CarryableObject>();
+                if (carryable == null || !carryController.TryPickUp(carryable))
+                {
+                    Destroy(batchObject);
+                    GameplayMessageUI.Show("Your hands are full.");
+                    return null;
+                }
             }
 
             PlantingContainer container = GetComponentInParent<PlantingContainer>();
