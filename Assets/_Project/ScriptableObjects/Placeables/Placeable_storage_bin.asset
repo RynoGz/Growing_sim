@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: beedef363d9362541a71f36f874dde93, type: 3}
+  m_Name: Placeable_storage_bin
+  m_EditorClassIdentifier: Assembly-CSharp::Growveld.Building.PlaceableDefinition
+  placeableId: storage_bin
+  itemDefinition: {fileID: 11400000, guid: b6b534984c77f3445a1c9cf1c921742e, type: 2}
+  prefab: {fileID: 6217627013481599097, guid: b1f864ca81571664d8fd5354a2989c11, type: 3}
+  footprintSize: {x: 1.8, y: 1.4, z: 1.4}
+  placementOffset: {x: 0, y: 0, z: 0}
+  rotationStep: 15
+  sellRefundFraction: 0.7
+  lightCoverageRadius: 0

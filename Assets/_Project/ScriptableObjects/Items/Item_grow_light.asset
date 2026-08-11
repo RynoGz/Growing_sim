@@ -20,3 +20,4 @@ MonoBehaviour:
   maximumStack: 1
   purchasePrice: 3200
   displayColor: {r: 0.95, g: 0.82, b: 0.35, a: 1}
+  placeableDefinition: {fileID: 11400000, guid: 16e857f90c0a4a9499b6c42c7ac0dece, type: 2}
