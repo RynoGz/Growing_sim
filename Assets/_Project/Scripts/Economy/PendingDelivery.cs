@@ -25,6 +25,13 @@ namespace Growveld.Economy
             this.remainingGameMinutes = Mathf.Max(0f, remainingGameMinutes);
         }
 
+        public static PendingDelivery CreateRestored(string id, ItemDefinition item, int quantity, float remainingGameMinutes)
+        {
+            PendingDelivery delivery = new(item, quantity, remainingGameMinutes);
+            delivery.deliveryId = string.IsNullOrWhiteSpace(id) ? Guid.NewGuid().ToString("N") : id;
+            return delivery;
+        }
+
         public void Advance(float elapsedGameMinutes)
         {
             remainingGameMinutes = Mathf.Max(0f, remainingGameMinutes - Mathf.Max(0f, elapsedGameMinutes));

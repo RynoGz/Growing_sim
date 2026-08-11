@@ -115,6 +115,19 @@ namespace Growveld.Farming
             return null;
         }
 
+        public bool RestoreBatchAtSlot(int slotIndex, HarvestBatch batch, float remainingSeconds)
+        {
+            EnsureSlots();
+            if (batch == null || slotIndex < 0 || slotIndex >= slots.Count || !slots[slotIndex].IsEmpty)
+            {
+                return false;
+            }
+
+            DockBatch(batch, slots[slotIndex].Anchor);
+            slots[slotIndex].Restore(batch, remainingSeconds);
+            return true;
+        }
+
         private void DockBatch(HarvestBatch batch, Transform anchor)
         {
             Rigidbody body = batch.GetComponent<Rigidbody>();

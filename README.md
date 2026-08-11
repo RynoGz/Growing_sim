@@ -8,7 +8,7 @@ Growveld is a first-person farming and business simulator prototype set in a fic
 - Render pipeline: Universal Render Pipeline (URP)
 - Input: Unity Input System
 - Initial platform: Windows, keyboard and mouse
-- Current milestone: Phase 21 - day and night time system
+- Current milestone: Phase 22 - persistent save and load system
 
 ## Current controls
 
@@ -23,6 +23,8 @@ Growveld is a first-person farming and business simulator prototype set in a fic
 - `Escape`: Cancel placement
 - `Delete`: Sell an object while moving it
 - `T`: Open or close the business tablet
+- `F5`: Save the game manually
+- `F9`: Load the latest save
 - `Escape`: Release the mouse cursor
 - Left click in the Game view: Lock the cursor again
 

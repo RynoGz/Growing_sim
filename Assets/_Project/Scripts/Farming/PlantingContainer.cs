@@ -67,5 +67,19 @@ namespace Growveld.Farming
         {
             currentPlant = plant;
         }
+
+        public PlantInstance SpawnRestoredPlant()
+        {
+            if (plantPrefab == null || currentPlant != null)
+            {
+                return currentPlant;
+            }
+
+            if (plantSocket == null) plantSocket = transform;
+            GameObject plantObject = Instantiate(plantPrefab, plantSocket.position, plantSocket.rotation, plantSocket);
+            plantObject.name = plantDefinition != null ? plantDefinition.DisplayName : "Restored Plant";
+            currentPlant = plantObject.GetComponent<PlantInstance>();
+            return currentPlant;
+        }
     }
 }

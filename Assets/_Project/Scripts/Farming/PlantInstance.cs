@@ -46,6 +46,8 @@ namespace Growveld.Farming
         public float Health => health;
         public float QualityScore => qualityScore;
         public float YieldPotential => yieldPotential;
+        public float AccumulatedCareScore => accumulatedCareScore;
+        public float CareSampleSeconds => careSampleSeconds;
         public QualityGrade CurrentQualityGrade => definition != null && definition.QualitySettings != null
             ? definition.QualitySettings.GetGrade(qualityScore)
             : QualityGrade.Standard;
