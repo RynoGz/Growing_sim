@@ -13,13 +13,15 @@ namespace Growveld.Environment
 
         private PlantInstance plant;
         private GrowRoomEnvironment currentRoom;
+        private GrowLight coveringLight;
         private float refreshTimer;
 
         public GrowRoomEnvironment CurrentRoom => currentRoom;
         public bool IsIndoor => currentRoom != null;
+        public GrowLight CoveringLight => coveringLight;
         public string ContextSummary => currentRoom == null
             ? "Environment: Uncontrolled"
-            : $"Environment: Indoor\nHumidity: {currentRoom.HumidityStatus}";
+            : $"Environment: Indoor\nHumidity: {currentRoom.HumidityStatus}\nGrow light: {(coveringLight != null ? "Active" : "No coverage")}";
 
         private void Awake()
         {
@@ -36,7 +38,12 @@ namespace Growveld.Environment
 
             refreshTimer = refreshInterval;
             currentRoom = GrowRoomEnvironment.FindContainingRoom(transform.position);
-            float multiplier = currentRoom != null ? currentRoom.GetHumidityGrowthMultiplier() : 1f;
+            coveringLight = currentRoom != null
+                ? GrowLight.FindCoveringLight(transform.position, currentRoom)
+                : null;
+            float multiplier = currentRoom != null
+                ? currentRoom.GetHumidityGrowthMultiplier() * (coveringLight != null ? 1.15f : 0f)
+                : 1f;
             plant.SetExternalGrowthMultiplier(multiplier);
         }
     }

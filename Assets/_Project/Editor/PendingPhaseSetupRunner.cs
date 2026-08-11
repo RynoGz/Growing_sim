@@ -14,6 +14,7 @@ namespace Growveld.Editor
     [InitializeOnLoad]
     public static class PendingPhaseSetupRunner
     {
+        // Kept in source so adding a pending setup can deliberately trigger a fresh editor reload.
         private const string PendingSetupPath = "Assets/_Project/Editor/PendingPhaseSetup.txt";
 
         static PendingPhaseSetupRunner()
