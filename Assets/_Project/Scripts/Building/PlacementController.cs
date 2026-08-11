@@ -83,6 +83,11 @@ namespace Growveld.Building
 
         public bool BeginSelectedPlacement()
         {
+            if (economy != null && !economy.CanMakePurchases)
+            {
+                return false;
+            }
+
             InventorySlot selectedSlot = inventory != null ? inventory.SelectedSlot : null;
             if (selectedSlot == null || selectedSlot.IsEmpty || selectedSlot.Item.PlaceableDefinition == null)
             {

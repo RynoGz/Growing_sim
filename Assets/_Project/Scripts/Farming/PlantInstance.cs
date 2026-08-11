@@ -2,6 +2,7 @@ using System;
 using Growveld.Interaction;
 using Growveld.Inventory;
 using Growveld.Environment;
+using Growveld.Economy;
 using UnityEngine;
 
 namespace Growveld.Farming
@@ -28,6 +29,7 @@ namespace Growveld.Farming
 
         private PlantGrowthStage currentStage;
         private PlantEnvironmentController environmentController;
+        private UtilityManager utilityManager;
 
         public event Action<PlantGrowthStage> StageChanged;
 
@@ -74,6 +76,7 @@ namespace Growveld.Farming
         private void Awake()
         {
             environmentController = GetComponent<PlantEnvironmentController>();
+            utilityManager = FindFirstObjectByType<UtilityManager>();
             RefreshStage(true);
         }
 
@@ -119,7 +122,9 @@ namespace Growveld.Farming
 
             if (selectedSlot.Item.ItemId == "watering_can")
             {
+                float waterBefore = waterLevel;
                 AddWater(definition.WaterPerUse);
+                if (waterLevel > waterBefore) utilityManager?.RecordWatering();
             }
             else if (selectedSlot.Item.ItemId == "nutrients"
                 && inventory.Remove(selectedSlot.Item, 1))
