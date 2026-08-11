@@ -14,14 +14,29 @@ namespace Growveld.Environment
         private PlantInstance plant;
         private GrowRoomEnvironment currentRoom;
         private GrowLight coveringLight;
+        private OutdoorEnvironment outdoorEnvironment;
         private float refreshTimer;
 
         public GrowRoomEnvironment CurrentRoom => currentRoom;
         public bool IsIndoor => currentRoom != null;
         public GrowLight CoveringLight => coveringLight;
-        public string ContextSummary => currentRoom == null
-            ? "Environment: Uncontrolled"
-            : $"Environment: Indoor\nHumidity: {currentRoom.HumidityStatus}\nGrow light: {(coveringLight != null ? "Active" : "No coverage")}";
+        public string ContextSummary
+        {
+            get
+            {
+                if (currentRoom != null)
+                {
+                    return $"Environment: Indoor\nHumidity: {currentRoom.HumidityStatus}\nGrow light: {(coveringLight != null ? "Active" : "No coverage")}";
+                }
+
+                if (outdoorEnvironment != null)
+                {
+                    return $"Environment: Outdoor\nDaylight: {(outdoorEnvironment.IsDaylight ? "Yes" : "Night")}\nHumidity: {outdoorEnvironment.HumidityStatus}";
+                }
+
+                return "Environment: Uncontrolled";
+            }
+        }
 
         private void Awake()
         {
@@ -41,9 +56,12 @@ namespace Growveld.Environment
             coveringLight = currentRoom != null
                 ? GrowLight.FindCoveringLight(transform.position, currentRoom)
                 : null;
+            outdoorEnvironment = currentRoom == null ? OutdoorEnvironment.Current : null;
             float multiplier = currentRoom != null
                 ? currentRoom.GetHumidityGrowthMultiplier() * (coveringLight != null ? 1.15f : 0f)
-                : 1f;
+                : outdoorEnvironment != null
+                    ? outdoorEnvironment.GetGrowthMultiplier()
+                    : 1f;
             plant.SetExternalGrowthMultiplier(multiplier);
         }
     }

@@ -1,5 +1,6 @@
 using Growveld.Interaction;
 using Growveld.Inventory;
+using Growveld.Building;
 using UnityEngine;
 
 namespace Growveld.Farming
@@ -15,6 +16,8 @@ namespace Growveld.Farming
         [SerializeField] private Transform plantSocket;
         [SerializeField] private PlantInstance currentPlant;
         [SerializeField] private bool outdoor;
+        [SerializeField] private bool requireOwnedLand;
+        [SerializeField] private LandManager landManager;
 
         public PlantInstance CurrentPlant => currentPlant;
         public bool IsOutdoor => outdoor;
@@ -22,7 +25,7 @@ namespace Growveld.Farming
             ? $"Plant {seedItem?.DisplayName ?? "seed"}"
             : "Inspect planted crop";
         public string ContextualInfo => currentPlant == null
-            ? $"Empty {(outdoor ? "outdoor" : "indoor")} grow position\nRequires: {seedItem?.DisplayName ?? "seed"}"
+            ? $"Empty grow position\nRequires: {seedItem?.DisplayName ?? "seed"}"
             : currentPlant.ContextualInfo;
 
         private void Awake()
@@ -36,6 +39,7 @@ namespace Growveld.Farming
             return currentPlant == null
                 && plantPrefab != null
                 && seedItem != null
+                && (!requireOwnedLand || (landManager != null && landManager.IsPositionOwned(transform.position)))
                 && interactor.TryGetComponent(out PlayerInventory inventory)
                 && inventory.Count(seedItem) > 0;
         }
