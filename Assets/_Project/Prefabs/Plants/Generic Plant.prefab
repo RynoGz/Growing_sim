@@ -572,6 +572,7 @@ MonoBehaviour:
   yieldPotential: 1
   accumulatedCareScore: 0
   careSampleSeconds: 0
+  harvestBatchPrefab: {fileID: 930958900499433395, guid: 893509e48766a614b83abf8288ac0c0a, type: 3}
 --- !u!114 &5806213262338778122
 MonoBehaviour:
   m_ObjectHideFlags: 0

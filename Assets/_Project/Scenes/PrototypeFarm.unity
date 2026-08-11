@@ -4565,6 +4565,75 @@ Transform:
   m_Children: []
   m_Father: {fileID: 581970905}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &816408546
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 1433622427897992963, guid: 406206f2961a2bf4aa7ca4583f86542c, type: 3}
+      propertyPath: currentPlant
+      value: 
+      objectReference: {fileID: 2002779438}
+    - target: {fileID: 1630826143341329254, guid: 406206f2961a2bf4aa7ca4583f86542c, type: 3}
+      propertyPath: m_Name
+      value: Harvest Test Pot
+      objectReference: {fileID: 0}
+    - target: {fileID: 3182247385758009854, guid: 406206f2961a2bf4aa7ca4583f86542c, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 3182247385758009854, guid: 406206f2961a2bf4aa7ca4583f86542c, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3182247385758009854, guid: 406206f2961a2bf4aa7ca4583f86542c, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3182247385758009854, guid: 406206f2961a2bf4aa7ca4583f86542c, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3182247385758009854, guid: 406206f2961a2bf4aa7ca4583f86542c, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3182247385758009854, guid: 406206f2961a2bf4aa7ca4583f86542c, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3182247385758009854, guid: 406206f2961a2bf4aa7ca4583f86542c, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3182247385758009854, guid: 406206f2961a2bf4aa7ca4583f86542c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3182247385758009854, guid: 406206f2961a2bf4aa7ca4583f86542c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3182247385758009854, guid: 406206f2961a2bf4aa7ca4583f86542c, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 4711564240605809942, guid: 406206f2961a2bf4aa7ca4583f86542c, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 2002779439}
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 406206f2961a2bf4aa7ca4583f86542c, type: 3}
+--- !u!4 &816408547 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4711564240605809942, guid: 406206f2961a2bf4aa7ca4583f86542c, type: 3}
+  m_PrefabInstance: {fileID: 816408546}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &837219374
 GameObject:
   m_ObjectHideFlags: 0
@@ -12214,6 +12283,91 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 0}
+--- !u!1001 &2002779437
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 816408547}
+    m_Modifications:
+    - target: {fileID: 517668997663683060, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 517668997663683060, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 517668997663683060, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 517668997663683060, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 517668997663683060, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 517668997663683060, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 517668997663683060, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 517668997663683060, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 517668997663683060, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 517668997663683060, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2244491659409833220, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+      propertyPath: qualityScore
+      value: 82
+      objectReference: {fileID: 0}
+    - target: {fileID: 2244491659409833220, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+      propertyPath: yieldPotential
+      value: 0.95
+      objectReference: {fileID: 0}
+    - target: {fileID: 2244491659409833220, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+      propertyPath: elapsedGrowthSeconds
+      value: 1800
+      objectReference: {fileID: 0}
+    - target: {fileID: 8043868304584446466, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+      propertyPath: m_Name
+      value: Harvest Ready Test Plant
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+--- !u!114 &2002779438 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 2244491659409833220, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+  m_PrefabInstance: {fileID: 2002779437}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f819dfb3af6349b47bfba8288650395e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Growveld.Farming.PlantInstance
+--- !u!4 &2002779439 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 517668997663683060, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+  m_PrefabInstance: {fileID: 2002779437}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2019194874
 GameObject:
   m_ObjectHideFlags: 0
@@ -13073,3 +13227,4 @@ SceneRoots:
   - {fileID: 1698921612}
   - {fileID: 373501578}
   - {fileID: 837219375}
+  - {fileID: 816408546}

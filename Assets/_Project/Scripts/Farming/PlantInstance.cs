@@ -24,6 +24,7 @@ namespace Growveld.Farming
         [SerializeField, Range(0f, 2f)] private float yieldPotential = 1f;
         [SerializeField, Min(0f)] private float accumulatedCareScore;
         [SerializeField, Min(0f)] private float careSampleSeconds;
+        [SerializeField] private GameObject harvestBatchPrefab;
 
         private PlantGrowthStage currentStage;
         private PlantEnvironmentController environmentController;
@@ -54,7 +55,7 @@ namespace Growveld.Farming
             : 0f;
         public string WaterStatus => FormatResourceStatus(waterLevel, definition != null ? definition.MaximumWater : 100f);
         public string NutrientStatus => FormatResourceStatus(nutrientLevel, definition != null ? definition.MaximumNutrients : 100f);
-        public string InteractionPrompt => IsHarvestReady ? "Inspect harvest-ready plant" : "Care for plant (select watering can or nutrients)";
+        public string InteractionPrompt => IsHarvestReady ? "Harvest plant" : "Care for plant (select watering can or nutrients)";
         public string ContextualInfo
         {
             get
@@ -99,6 +100,12 @@ namespace Growveld.Farming
 
         public void Interact(GameObject interactor)
         {
+            if (IsHarvestReady)
+            {
+                Harvest();
+                return;
+            }
+
             if (!interactor.TryGetComponent(out PlayerInventory inventory))
             {
                 return;
@@ -119,6 +126,27 @@ namespace Growveld.Farming
             {
                 AddNutrients(definition.NutrientsPerDose);
             }
+        }
+
+        public HarvestBatch Harvest()
+        {
+            if (!IsHarvestReady || harvestBatchPrefab == null)
+            {
+                return null;
+            }
+
+            Vector3 spawnPosition = transform.position + transform.forward * 0.8f + Vector3.up * 0.45f;
+            GameObject batchObject = Instantiate(harvestBatchPrefab, spawnPosition, Quaternion.identity);
+            HarvestBatch batch = batchObject.GetComponent<HarvestBatch>();
+            if (batch != null)
+            {
+                batch.Initialise(CalculateHarvestYieldKilograms(), CurrentQualityGrade, HarvestStatus.Fresh);
+            }
+
+            PlantingContainer container = GetComponentInParent<PlantingContainer>();
+            container?.ClearPlant(this);
+            Destroy(gameObject);
+            return batch;
         }
 
         public void AdvanceGrowth(float growthSeconds)

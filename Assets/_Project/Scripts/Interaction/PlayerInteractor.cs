@@ -22,9 +22,11 @@ namespace Growveld.Interaction
 
         private InputAction interactAction;
         private IInteractable currentInteractable;
+        private IContextualInfoProvider currentContextProvider;
         private PlayerCarryController carryController;
 
         public IInteractable CurrentInteractable => currentInteractable;
+        public IContextualInfoProvider CurrentContextProvider => currentContextProvider;
 
         private void Awake()
         {
@@ -84,6 +86,8 @@ namespace Growveld.Interaction
                 return;
             }
 
+            currentContextProvider = FindContextProvider(hit.collider);
+
             IInteractable interactable = FindFirstAvailableInteractable(hit.collider);
             if (interactable == null)
             {
@@ -109,9 +113,21 @@ namespace Growveld.Interaction
             return null;
         }
 
+        private static IContextualInfoProvider FindContextProvider(Collider hitCollider)
+        {
+            MonoBehaviour[] behaviours = hitCollider.GetComponentsInParent<MonoBehaviour>(true);
+            foreach (MonoBehaviour behaviour in behaviours)
+            {
+                if (behaviour is IContextualInfoProvider provider) return provider;
+            }
+
+            return null;
+        }
+
         private void ClearInteractionTarget()
         {
             currentInteractable = null;
+            currentContextProvider = null;
             promptUI?.HidePrompt();
         }
 

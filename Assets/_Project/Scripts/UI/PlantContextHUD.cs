@@ -15,7 +15,7 @@ namespace Growveld.UI
 
         private void Update()
         {
-            if (interactor != null && interactor.CurrentInteractable is IContextualInfoProvider provider)
+            if (interactor != null && interactor.CurrentContextProvider is IContextualInfoProvider provider)
             {
                 if (detailsText != null) detailsText.text = provider.ContextualInfo;
                 SetVisible(true);
