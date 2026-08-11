@@ -18,7 +18,7 @@ MonoBehaviour:
   seedlingSeconds: 240
   vegetativeSeconds: 540
   floweringSeconds: 900
-  baseYieldKilograms: 0.45
+  baseYieldKilograms: 0.65
   maximumWater: 100
   maximumNutrients: 100
   waterConsumptionPerRealMinute: 4

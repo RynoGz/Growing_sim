@@ -8502,6 +8502,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Growveld.Economy.UtilityManager
   economy: {fileID: 1278170507}
   settings: {fileID: 11400000, guid: 3d05ec34b379c574fa863baea1901004, type: 2}
+  gameTime: {fileID: 1278170516}
   currentElectricityKilowattHours: 0
   currentWaterLitres: 0
   fallbackDayElapsedSeconds: 0
@@ -11513,6 +11514,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1643386783}
+  - component: {fileID: 1643386784}
   m_Layer: 0
   m_Name: Finances
   m_TagString: Untagged
@@ -11532,7 +11534,7 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 2117284409}
+  - {fileID: 2011429649}
   m_Father: {fileID: 1498609501}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -11540,6 +11542,35 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 0}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &1643386784
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1643386782}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05c1292c9bdcce048b285fd016ef2125, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Growveld.UI.BalanceOverviewUI
+  economy: {fileID: 1278170507}
+  plant: {fileID: 11400000, guid: 6c6fc440bf0047a4a95f44c6bf727ce8, type: 2}
+  quality: {fileID: 11400000, guid: 974d0af09f4ed9c48af1fc90101e926c, type: 2}
+  selling: {fileID: 11400000, guid: 9b2605fd2b322524ab29231b2b8c65ef, type: 2}
+  utilities: {fileID: 11400000, guid: 3d05ec34b379c574fa863baea1901004, type: 2}
+  items:
+  - {fileID: 11400000, guid: 2c2f47b1c6fcea1448d54076a7cb662b, type: 2}
+  - {fileID: 11400000, guid: c283f9e9589d5124898950a19f663ae9, type: 2}
+  - {fileID: 11400000, guid: 87e7de2330f3ed443bc233aeaeebc9d3, type: 2}
+  - {fileID: 11400000, guid: c7df28f331a39304da9cdf56baf2493c, type: 2}
+  - {fileID: 11400000, guid: adae7de178adc464c9cff5d996688297, type: 2}
+  - {fileID: 11400000, guid: 13ee720e8b38a1d4694d8e268d937b55, type: 2}
+  - {fileID: 11400000, guid: b6b534984c77f3445a1c9cf1c921742e, type: 2}
+  - {fileID: 11400000, guid: 5de2b236e4ee54341b280c51d030af17, type: 2}
+  summaryText: {fileID: 2011429647}
+  growLightKilowatts: 1.2
+  scheduledLightHours: 18
 --- !u!1 &1648312946
 GameObject:
   m_ObjectHideFlags: 0
@@ -13655,6 +13686,85 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 517668997663683060, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
   m_PrefabInstance: {fileID: 2002779437}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &2011429646
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2011429649}
+  - component: {fileID: 2011429648}
+  - component: {fileID: 2011429647}
+  m_Layer: 0
+  m_Name: Balance Summary
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2011429647
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2011429646}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
+  m_Material: {fileID: 0}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_RaycastTarget: 1
+  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
+  m_Maskable: 1
+  m_OnCullStateChanged:
+    m_PersistentCalls:
+      m_Calls: []
+  m_FontData:
+    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
+    m_FontSize: 22
+    m_FontStyle: 0
+    m_BestFit: 0
+    m_MinSize: 10
+    m_MaxSize: 40
+    m_Alignment: 0
+    m_AlignByGeometry: 0
+    m_RichText: 1
+    m_HorizontalOverflow: 0
+    m_VerticalOverflow: 0
+    m_LineSpacing: 1
+  m_Text: 
+--- !u!222 &2011429648
+CanvasRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2011429646}
+  m_CullTransparentMesh: 1
+--- !u!224 &2011429649
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2011429646}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1643386783}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: -44, y: -36}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2019194874
 GameObject:
   m_ObjectHideFlags: 0
@@ -14044,85 +14154,6 @@ MonoBehaviour:
   outdoor: 1
   requireOwnedLand: 1
   landManager: {fileID: 1278170509}
---- !u!1 &2117284408
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 2117284409}
-  - component: {fileID: 2117284411}
-  - component: {fileID: 2117284410}
-  m_Layer: 0
-  m_Name: Section Copy
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &2117284409
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2117284408}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1643386783}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 18, y: 18}
-  m_SizeDelta: {x: 950, y: 630}
-  m_Pivot: {x: 0, y: 0}
---- !u!114 &2117284410
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2117284408}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5f7201a12d95ffc409449d95f23cf332, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Text
-  m_Material: {fileID: 0}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
-  m_RaycastTarget: 1
-  m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
-  m_Maskable: 1
-  m_OnCullStateChanged:
-    m_PersistentCalls:
-      m_Calls: []
-  m_FontData:
-    m_Font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
-    m_FontSize: 24
-    m_FontStyle: 0
-    m_BestFit: 0
-    m_MinSize: 10
-    m_MaxSize: 40
-    m_Alignment: 0
-    m_AlignByGeometry: 0
-    m_RichText: 1
-    m_HorizontalOverflow: 0
-    m_VerticalOverflow: 0
-    m_LineSpacing: 1
-  m_Text: Transaction history and daily expense summaries appear here.
---- !u!222 &2117284411
-CanvasRenderer:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2117284408}
-  m_CullTransparentMesh: 1
 --- !u!1 &2122536952
 GameObject:
   m_ObjectHideFlags: 0

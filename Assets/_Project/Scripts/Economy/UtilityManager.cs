@@ -1,4 +1,5 @@
 using System;
+using Growveld.Core;
 using Growveld.Environment;
 using UnityEngine;
 
@@ -11,6 +12,7 @@ namespace Growveld.Economy
     {
         [SerializeField] private EconomyManager economy;
         [SerializeField] private UtilitySettings settings;
+        [SerializeField] private GameTimeManager gameTime;
         [SerializeField, Min(0f)] private float currentElectricityKilowattHours;
         [SerializeField, Min(0f)] private float currentWaterLitres;
         [SerializeField, Min(0f)] private float fallbackDayElapsedSeconds;
@@ -40,7 +42,12 @@ namespace Growveld.Economy
             {
                 if (growLight != null && growLight.IsActive) activeKilowatts += growLight.PowerConsumptionKilowatts;
             }
-            currentElectricityKilowattHours += activeKilowatts * (Time.deltaTime / 3600f);
+            // Utilities follow the accelerated simulation clock. At the prototype's
+            // 30-minute day, an 18-hour light schedule must still consume 18 game-hours.
+            float elapsedHours = gameTime != null
+                ? gameTime.GameMinutesAdvancedThisFrame / 60f
+                : Time.deltaTime / 3600f;
+            currentElectricityKilowattHours += activeKilowatts * Mathf.Max(0f, elapsedHours);
 
             if (!externalDayClockEnabled && settings != null)
             {
