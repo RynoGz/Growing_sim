@@ -9,7 +9,7 @@ namespace Growveld.Farming
     /// <summary>
     /// Accepts physical Fresh batches and advances each occupied drying slot independently.
     /// </summary>
-    public sealed class DryingRack : MonoBehaviour, IHeldObjectReceiver, IContextualInfoProvider
+    public sealed class DryingRack : MonoBehaviour, IHeldObjectReceiver, IContextualInfoProvider, IContextualInteractionPrompt
     {
         [SerializeField, Min(1f)] private float dryingDurationSeconds = 600f;
         [SerializeField] private Transform[] slotAnchors;
@@ -33,6 +33,16 @@ namespace Growveld.Farming
             : HasReadyBatch()
                 ? "Remove Dried batch"
                 : "Drying rack";
+
+        public string GetInteractionPrompt(GameObject interactor)
+        {
+            if (HasFreshCarriedBatch(interactor, out _) && FindEmptySlot() != null)
+            {
+                return "Place fresh batch on drying rack";
+            }
+            if (!IsPlayerCarrying(interactor) && HasReadyBatch()) return "Remove dried batch";
+            return string.Empty;
+        }
         public string ContextualInfo
         {
             get
@@ -67,13 +77,13 @@ namespace Growveld.Farming
 
         public bool CanInteract(GameObject interactor)
         {
-            return (HasFreshCarriedBatch(out _) && FindEmptySlot() != null)
+            return (HasFreshCarriedBatch(interactor, out _) && FindEmptySlot() != null)
                 || (!IsPlayerCarrying(interactor) && HasReadyBatch());
         }
 
         public void Interact(GameObject interactor)
         {
-            if (HasFreshCarriedBatch(out HarvestBatch carriedBatch))
+            if (HasFreshCarriedBatch(interactor, out HarvestBatch carriedBatch))
             {
                 TryAcceptBatch(interactor, carriedBatch);
             }
@@ -164,6 +174,18 @@ namespace Growveld.Farming
         private bool HasFreshCarriedBatch(out HarvestBatch batch)
         {
             PlayerCarryController carryController = FindFirstObjectByType<PlayerCarryController>();
+            batch = carryController != null && carryController.HeldObject != null
+                ? carryController.HeldObject.GetComponent<HarvestBatch>()
+                : null;
+            return batch != null && batch.Status == HarvestStatus.Fresh;
+        }
+
+        private static bool HasFreshCarriedBatch(GameObject interactor, out HarvestBatch batch)
+        {
+            PlayerCarryController carryController = interactor != null
+                && interactor.TryGetComponent(out PlayerCarryController controller)
+                    ? controller
+                    : null;
             batch = carryController != null && carryController.HeldObject != null
                 ? carryController.HeldObject.GetComponent<HarvestBatch>()
                 : null;

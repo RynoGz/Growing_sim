@@ -47,10 +47,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 41d50cec0c7b4e34f943cf33753d856d, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Growveld.Building.PlacedObject
   definition: {fileID: 11400000, guid: 467e1c264e1aded4681d2b86eb786f57, type: 2}
-  persistentId:
+  persistentId: 
 --- !u!114 &8098825515700659333
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -61,14 +61,14 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 18d508cfc3bb9594091a334ddb9ac642, type: 3}
-  m_Name:
+  m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Growveld.Environment.GrowLight
   coverageRadius: 6
   powerConsumptionKilowatts: 1.2
   lightSource: {fileID: 8386891017014382978}
-  visualIntensity: 300
-  visualRange: 8
-  visualColor: {r: 0.72, g: 0.82, b: 1, a: 1}
+  visualIntensity: 55
+  visualRange: 4.5
+  visualColor: {r: 0.8, g: 0.84, b: 0.96, a: 1}
   visualLightType: 0
   spotAngle: 110
   automaticSchedule: 1
@@ -318,19 +318,19 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 0
-  m_Color: {r: 0.72, g: 0.82, b: 1, a: 1}
-  m_Intensity: 300
-  m_Range: 8
+  m_Color: {r: 0.8, g: 0.84, b: 0.96, a: 1}
+  m_Intensity: 55
+  m_Range: 4.5
   m_SpotAngle: 110
   m_InnerSpotAngle: 75
   m_CookieSize2D: {x: 0.5, y: 0.5}
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
-    m_Strength: 1
-    m_Bias: 0.05
-    m_NormalBias: 0.4
+    m_Strength: 0.72
+    m_Bias: 0.08
+    m_NormalBias: 0.35
     m_NearPlane: 0.2
     m_CullingMatrixOverride:
       e00: 1

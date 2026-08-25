@@ -268,9 +268,9 @@ MonoBehaviour:
   coverageRadius: 6
   powerConsumptionKilowatts: 1.2
   lightSource: {fileID: 3884159389850761706}
-  visualIntensity: 300
-  visualRange: 8
-  visualColor: {r: 0.72, g: 0.82, b: 1, a: 1}
+  visualIntensity: 55
+  visualRange: 4.5
+  visualColor: {r: 0.8, g: 0.84, b: 0.96, a: 1}
   visualLightType: 2
   spotAngle: 110
   automaticSchedule: 1
@@ -431,19 +431,19 @@ Light:
   m_Enabled: 1
   serializedVersion: 12
   m_Type: 2
-  m_Color: {r: 0.72, g: 0.82, b: 1, a: 1}
-  m_Intensity: 300
-  m_Range: 8
+  m_Color: {r: 0.8, g: 0.84, b: 0.96, a: 1}
+  m_Intensity: 55
+  m_Range: 4.5
   m_SpotAngle: 30
   m_InnerSpotAngle: 21.80208
   m_CookieSize2D: {x: 0.5, y: 0.5}
   m_Shadows:
-    m_Type: 0
+    m_Type: 2
     m_Resolution: -1
     m_CustomResolution: -1
-    m_Strength: 1
-    m_Bias: 0.05
-    m_NormalBias: 0.4
+    m_Strength: 0.72
+    m_Bias: 0.08
+    m_NormalBias: 0.35
     m_NearPlane: 0.2
     m_CullingMatrixOverride:
       e00: 1

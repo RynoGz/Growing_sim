@@ -8,7 +8,7 @@ namespace Growveld.Farming
     /// <summary>
     /// Converts carried physical Dried batches into quality-separated farm stock.
     /// </summary>
-    public sealed class StorageContainer : MonoBehaviour, IHeldObjectReceiver, IContextualInfoProvider
+    public sealed class StorageContainer : MonoBehaviour, IHeldObjectReceiver, IContextualInfoProvider, IContextualInteractionPrompt
     {
         [SerializeField] private FarmStockManager farmStock;
         [SerializeField, Min(1f)] private float capacityKilograms = 25f;
@@ -17,6 +17,9 @@ namespace Growveld.Farming
         public float CapacityKilograms => capacityKilograms;
         public float StoredKilograms => storedKilograms;
         public string InteractionPrompt => "Store Dried harvest batch";
+        public string GetInteractionPrompt(GameObject interactor) => CanInteract(interactor)
+            ? "Store dried harvest batch"
+            : string.Empty;
         public string ContextualInfo => $"Storage Bin\nStored: {storedKilograms:0.00} / {capacityKilograms:0.00} kg\nFarm stock total: {(farmStock != null ? farmStock.TotalKilograms : 0f):0.00} kg";
 
         private void Awake()

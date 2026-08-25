@@ -59,6 +59,7 @@ namespace Growveld.Core
             Require(player != null && inventory != null && placement != null && construction != null, "player construction references missing");
             Require(tablet != null && tabletInventory != null, "tablet inventory references missing");
             Require(ceilingItem != null && ceilingItem.PlaceableDefinition != null, "ceiling grow-light item missing");
+            TestFollowUpSceneConfiguration(player, tabletInventory);
 
             List<InventorySnapshot> originalInventory = CaptureInventory(inventory);
             if (inventory != null) inventory.ClearAll();
@@ -67,6 +68,7 @@ namespace Growveld.Core
             {
                 yield return StartCoroutine(TestTabletPlacementEntry(inventory, ceilingItem, tablet, tabletInventory, construction, placement));
                 yield return StartCoroutine(TestPlacementAndSave(inventory, ceilingItem, construction, placement, saveSystem, player));
+                yield return StartCoroutine(TestInventoryDrivenPlantCare(player, inventory, shop));
                 yield return StartCoroutine(TestHarvestCarry(player, carry));
                 yield return StartCoroutine(TestGrowLights(ceilingItem));
                 yield return StartCoroutine(TestWorldTextOcclusion());
@@ -112,7 +114,6 @@ namespace Growveld.Core
             PlacementController placement)
         {
             Require(inventory.Add(item, 1), "could not add ceiling light for tablet test");
-            Require(inventory.GetHotbarSlotIndex(0) < 0, "placeable equipment leaked into the hotbar");
 
             tablet.SetOpen(true);
             tabletInventory.gameObject.SetActive(true);
@@ -131,9 +132,26 @@ namespace Growveld.Core
                 };
                 row.OnPointerClick(pointer);
                 Require(tabletInventory.IsContextMenuOpen, "right-click did not open the inventory context menu");
+                Canvas.ForceUpdateCanvases();
+                yield return null;
 
-                Button placeButton = tabletInventory.GetComponentsInChildren<Button>(true)
-                    .FirstOrDefault(button => button.name == "Place");
+                GameObject contextMenu = GetPrivateField<GameObject>(tabletInventory, "contextMenu");
+                RectTransform menuRect = contextMenu != null ? contextMenu.GetComponent<RectTransform>() : null;
+                RectTransform popupLayer = menuRect != null ? menuRect.parent as RectTransform : null;
+                Require(popupLayer != null && popupLayer.name == "Popup Layer", "context menu is not in the top-level Popup Layer");
+                if (menuRect != null && popupLayer != null)
+                {
+                    Vector3[] menuCorners = new Vector3[4];
+                    Vector3[] layerCorners = new Vector3[4];
+                    menuRect.GetWorldCorners(menuCorners);
+                    popupLayer.GetWorldCorners(layerCorners);
+                    Require(menuCorners.All(corner => corner.x >= layerCorners[0].x - 0.1f
+                        && corner.x <= layerCorners[2].x + 0.1f
+                        && corner.y >= layerCorners[0].y - 0.1f
+                        && corner.y <= layerCorners[2].y + 0.1f), "context menu escaped the tablet's visible popup bounds");
+                }
+
+                Button placeButton = GetPrivateField<Button>(tabletInventory, "placeButton");
                 Require(placeButton != null, "Place context action missing");
                 placeButton?.onClick.Invoke();
             }
@@ -232,6 +250,48 @@ namespace Growveld.Core
             yield return null;
         }
 
+        private IEnumerator TestInventoryDrivenPlantCare(GameObject player, PlayerInventory inventory, ShopManager shop)
+        {
+            ItemDefinition nutrients = shop?.AvailableItems?.FirstOrDefault(item => item != null && item.ItemId == "nutrients");
+            ItemDefinition wateringCan = shop?.AvailableItems?.FirstOrDefault(item => item != null && item.ItemId == "watering_can");
+            PlantingContainer sourceContainer = FindFirstObjectByType<PlantingContainer>();
+            GameObject plantPrefab = GetPrivateField<GameObject>(sourceContainer, "plantPrefab");
+            Require(nutrients != null && wateringCan != null && plantPrefab != null, "inventory-driven plant-care references missing");
+            if (nutrients == null || wateringCan == null || plantPrefab == null) yield break;
+
+            inventory.ClearAll();
+            Require(inventory.Add(nutrients, 2) && inventory.Add(wateringCan, 1), "could not prepare plant-care inventory");
+            int nutrientSlot = FindInventorySlot(inventory, nutrients);
+            int wateringSlot = FindInventorySlot(inventory, wateringCan);
+
+            GameObject plantObject = Instantiate(plantPrefab, player.transform.position + Vector3.up * 18f, Quaternion.identity);
+            PlantInstance plant = plantObject.GetComponent<PlantInstance>();
+            Require(plant != null && plant.Definition != null, "plant-care test plant definition missing");
+            if (plant == null || plant.Definition == null)
+            {
+                Destroy(plantObject);
+                inventory.ClearAll();
+                yield break;
+            }
+            plant.RestoreCare(0f, plant.Definition.MaximumNutrients, 100f);
+            inventory.SelectSlot(nutrientSlot);
+            Require(plant.GetInteractionPrompt(player) == "Water plant", "low-water plant did not show the Water prompt");
+            float waterBefore = plant.WaterLevel;
+            plant.Interact(player);
+            Require(plant.WaterLevel > waterBefore, "plant care still depends on the selected hotbar slot instead of the owned watering can");
+
+            plant.RestoreCare(plant.Definition.MaximumWater, 0f, 100f);
+            inventory.SelectSlot(wateringSlot);
+            int nutrientsBefore = inventory.Count(nutrients);
+            Require(plant.GetInteractionPrompt(player) == "Add nutrients", "low-nutrient plant did not show the Nutrients prompt");
+            plant.Interact(player);
+            Require(plant.NutrientLevel > 0f && inventory.Count(nutrients) == nutrientsBefore - 1, "inventory-driven nutrient care failed or consumed the wrong quantity");
+
+            Destroy(plantObject);
+            inventory.ClearAll();
+            yield return null;
+        }
+
         private IEnumerator TestGrowLights(ItemDefinition ceilingItem)
         {
             ItemDefinition floorItem = FindFirstObjectByType<ShopManager>()?.AvailableItems?
@@ -244,8 +304,11 @@ namespace Growveld.Core
                 GrowLight light = instance.GetComponent<GrowLight>();
                 light?.SetExternalSchedule(true);
                 Require(light != null && Mathf.Approximately(light.CoverageRadius, 6f), $"{item.DisplayName} coverage is not 6");
-                Require(light != null && Mathf.Approximately(light.VisualIntensity, 300f), $"{item.DisplayName} intensity is not 300");
+                Require(light != null && Mathf.Approximately(light.VisualIntensity, GrowLight.SharedVisualIntensity), $"{item.DisplayName} intensity is not {GrowLight.SharedVisualIntensity}");
+                Require(light != null && Mathf.Approximately(light.VisualRange, GrowLight.SharedVisualRange), $"{item.DisplayName} range is not {GrowLight.SharedVisualRange}");
+                Require(light != null && Vector4.Distance(light.VisualColor, GrowLight.SharedVisualColor) < 0.01f, $"{item.DisplayName} does not use the shared cool-white color");
                 Require(light != null && light.LightSource != null && light.LightSource.enabled, $"{item.DisplayName} visual Light did not turn on");
+                Require(light != null && light.LightSource != null && light.LightSource.shadows == LightShadows.Soft, $"{item.DisplayName} does not use wall-occluding soft shadows");
                 Destroy(instance);
             }
             yield return null;
@@ -299,10 +362,49 @@ namespace Growveld.Core
             return instance.GetType().GetField(fieldName, BindingFlags.Instance | BindingFlags.NonPublic)?.GetValue(instance) as T;
         }
 
+        private void TestFollowUpSceneConfiguration(GameObject player, TabletInventoryUI tabletInventory)
+        {
+            Require(player != null && player.GetComponent<InventoryHotbarInput>() == null, "hotbar number/wheel input is still attached");
+            Require(FindFirstObjectByType<InventoryHotbarUI>(FindObjectsInactive.Include) == null, "bottom hotbar UI still exists");
+            Require(!FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None).Any(canvas => canvas.name == "Inventory UI"), "legacy Inventory UI root still exists");
+            Require(!FindObjectsByType<Canvas>(FindObjectsInactive.Include, FindObjectsSortMode.None).Any(canvas => canvas.name == "Placement UI"), "legacy construction instruction panel still exists");
+
+            BusinessTabletUI tabletUI = FindFirstObjectByType<BusinessTabletUI>(FindObjectsInactive.Include);
+            string[] names = GetPrivateField<string[]>(tabletUI, "sectionNames");
+            string[] expected = { "Dashboard", "Shop", "Farm Stock", "Sell", "Finances", "Utilities", "Inventory", "Game Guide" };
+            Require(names != null && names.SequenceEqual(expected), "tablet navigation pages or order are incorrect");
+            Transform tabletRoot = tabletUI != null ? tabletUI.transform : null;
+            Transform content = tabletRoot != null ? tabletRoot.Find("Content") : null;
+            Require(tabletRoot != null && tabletRoot.Find("Land Tab") == null && tabletRoot.Find("Construction Tab") == null, "removed Land/Construction tabs still exist");
+            Require(content != null && content.Find("Game Guide") != null, "Game Guide section is missing");
+
+            InteractionPromptUI prompt = FindFirstObjectByType<InteractionPromptUI>(FindObjectsInactive.Include);
+            Require(prompt != null && prompt.GetComponent<PlacementHUD>() != null, "unified contextual placement prompt is missing");
+            if (prompt != null && tabletInventory != null)
+            {
+                PlacementHUD placementPrompt = prompt.GetComponent<PlacementHUD>();
+                prompt.SetPrompt(this, "carry", InteractionPromptUI.CarryPriority);
+                prompt.SetPrompt(placementPrompt, "placement", InteractionPromptUI.PlacementPriority);
+                Require(prompt.CurrentMessage == "placement", "prompt priority does not prefer placement");
+                prompt.ClearPrompt(placementPrompt);
+                Require(prompt.CurrentMessage == "carry", "prompt priority did not fall back to carry/drop");
+                prompt.ClearPrompt(this);
+            }
+        }
+
         private static PlacedObject FindPlacedObject(string persistentId)
         {
             return FindObjectsByType<PlacedObject>(FindObjectsInactive.Exclude, FindObjectsSortMode.None)
                 .FirstOrDefault(placed => placed.PersistentId == persistentId);
+        }
+
+        private static int FindInventorySlot(PlayerInventory inventory, ItemDefinition item)
+        {
+            for (int index = 0; index < inventory.Slots.Count; index++)
+            {
+                if (inventory.Slots[index]?.Item == item) return index;
+            }
+            return 0;
         }
 
         private static List<InventorySnapshot> CaptureInventory(PlayerInventory inventory)

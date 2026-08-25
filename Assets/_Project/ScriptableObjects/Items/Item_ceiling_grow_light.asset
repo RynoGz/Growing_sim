@@ -19,6 +19,6 @@ MonoBehaviour:
   stackable: 1
   maximumStack: 20
   purchasePrice: 3600
-  displayColor: {r: 0.72, g: 0.82, b: 1, a: 1}
+  displayColor: {r: 0.8, g: 0.84, b: 0.96, a: 1}
   icon: {fileID: 0}
   placeableDefinition: {fileID: 11400000, guid: 467e1c264e1aded4681d2b86eb786f57, type: 2}

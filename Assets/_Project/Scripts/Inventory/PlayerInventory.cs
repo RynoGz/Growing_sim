@@ -152,6 +152,22 @@ namespace Growveld.Inventory
             return total;
         }
 
+        public ItemDefinition FindOwnedItem(string itemId)
+        {
+            if (string.IsNullOrWhiteSpace(itemId)) return null;
+            foreach (InventorySlot slot in slots)
+            {
+                if (slot != null
+                    && !slot.IsEmpty
+                    && slot.Item != null
+                    && slot.Item.ItemId == itemId)
+                {
+                    return slot.Item;
+                }
+            }
+            return null;
+        }
+
         public void SelectSlot(int index)
         {
             EnsureCapacity();

@@ -12,7 +12,7 @@ namespace Growveld.Farming
     /// <summary>
     /// Runtime state for one plant. Care and environment modifiers plug into its growth multiplier.
     /// </summary>
-    public sealed class PlantInstance : MonoBehaviour, IInteractable, IContextualInfoProvider, IInteractionWhileCarrying
+    public sealed class PlantInstance : MonoBehaviour, IInteractable, IContextualInfoProvider, IInteractionWhileCarrying, IContextualInteractionPrompt
     {
         [SerializeField] private PlantDefinition definition;
         [SerializeField] private GameObject[] stageVisuals;
@@ -61,7 +61,7 @@ namespace Growveld.Farming
             : 0f;
         public string WaterStatus => FormatResourceStatus(waterLevel, definition != null ? definition.MaximumWater : 100f);
         public string NutrientStatus => FormatResourceStatus(nutrientLevel, definition != null ? definition.MaximumNutrients : 100f);
-        public string InteractionPrompt => IsHarvestReady ? "Harvest plant" : "Care for plant (select watering can or nutrients)";
+        public string InteractionPrompt => IsHarvestReady ? "Harvest plant" : "Care for plant";
         public string ContextualInfo
         {
             get
@@ -102,7 +102,29 @@ namespace Growveld.Farming
 
         public bool CanInteract(GameObject interactor)
         {
-            return true;
+            if (IsHarvestReady) return true;
+            return interactor != null
+                && interactor.TryGetComponent(out PlayerInventory inventory)
+                && GetAvailableCareAction(inventory, out _) != CareAction.None;
+        }
+
+        public string GetInteractionPrompt(GameObject interactor)
+        {
+            if (IsHarvestReady)
+            {
+                bool handsFull = interactor != null
+                    && interactor.TryGetComponent(out PlayerCarryController carryController)
+                    && carryController.IsCarrying;
+                return handsFull ? "Harvest plant (hands full)" : "Harvest plant";
+            }
+
+            if (interactor == null || !interactor.TryGetComponent(out PlayerInventory inventory)) return string.Empty;
+            return GetAvailableCareAction(inventory, out _) switch
+            {
+                CareAction.Water => "Water plant",
+                CareAction.Nutrients => "Add nutrients",
+                _ => string.Empty
+            };
         }
 
         public void Interact(GameObject interactor)
@@ -118,23 +140,47 @@ namespace Growveld.Farming
                 return;
             }
 
-            InventorySlot selectedSlot = inventory.SelectedSlot;
-            if (selectedSlot == null || selectedSlot.IsEmpty)
-            {
-                return;
-            }
-
-            if (selectedSlot.Item.ItemId == "watering_can")
+            CareAction action = GetAvailableCareAction(inventory, out ItemDefinition item);
+            if (action == CareAction.Water)
             {
                 float waterBefore = waterLevel;
                 AddWater(definition.WaterPerUse);
                 if (waterLevel > waterBefore) utilityManager?.RecordWatering();
             }
-            else if (selectedSlot.Item.ItemId == "nutrients"
-                && inventory.Remove(selectedSlot.Item, 1))
+            else if (action == CareAction.Nutrients && inventory.Remove(item, 1))
             {
                 AddNutrients(definition.NutrientsPerDose);
             }
+        }
+
+        private CareAction GetAvailableCareAction(PlayerInventory inventory, out ItemDefinition item)
+        {
+            item = null;
+            if (definition == null || inventory == null) return CareAction.None;
+
+            ItemDefinition wateringCan = inventory.FindOwnedItem("watering_can");
+            ItemDefinition nutrients = inventory.FindOwnedItem("nutrients");
+            bool canWater = wateringCan != null && waterLevel < definition.MaximumWater - 0.01f;
+            bool canFeed = nutrients != null && nutrientLevel < definition.MaximumNutrients - 0.01f;
+            if (!canWater && !canFeed) return CareAction.None;
+
+            float waterRatio = definition.MaximumWater <= 0f ? 1f : waterLevel / definition.MaximumWater;
+            float nutrientRatio = definition.MaximumNutrients <= 0f ? 1f : nutrientLevel / definition.MaximumNutrients;
+            if (canWater && (!canFeed || waterRatio <= nutrientRatio))
+            {
+                item = wateringCan;
+                return CareAction.Water;
+            }
+
+            item = nutrients;
+            return CareAction.Nutrients;
+        }
+
+        private enum CareAction
+        {
+            None,
+            Water,
+            Nutrients
         }
 
         public HarvestBatch Harvest()

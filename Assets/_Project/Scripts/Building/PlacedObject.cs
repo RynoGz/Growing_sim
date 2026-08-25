@@ -14,8 +14,8 @@ namespace Growveld.Building
         public PlaceableDefinition Definition => definition;
         public string PersistentId => persistentId;
         public string InteractionPrompt => definition == null
-            ? "Move placed object  |  [Delete] Sell"
-            : $"Move {definition.DisplayName}  |  [Delete] Sell R{definition.PurchasePrice * definition.SellRefundFraction:N0}";
+            ? "Move placed object\n[Delete] Sell"
+            : $"Move {definition.DisplayName}\n[Delete] Sell for R{definition.PurchasePrice * definition.SellRefundFraction:N0}";
 
         private void Awake()
         {

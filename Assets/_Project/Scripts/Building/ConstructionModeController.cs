@@ -60,7 +60,6 @@ namespace Growveld.Building
             if (IsActive) return;
             IsActive = true;
             ModeChanged?.Invoke(true);
-            GameplayMessageUI.Show("Construction Mode enabled");
         }
 
         public void ExitMode()
@@ -70,7 +69,6 @@ namespace Growveld.Building
             placementController?.CancelPlacement();
             IsActive = false;
             ModeChanged?.Invoke(false);
-            GameplayMessageUI.Show("Construction Mode disabled");
         }
 
         public bool BeginInventoryPlacement(ItemDefinition item)

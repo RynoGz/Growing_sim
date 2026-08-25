@@ -28,7 +28,7 @@ namespace Growveld.Editor
         private const string EquipmentMaterialPath = "Assets/_Project/Materials/M_PlaceableEquipment.mat";
         private const string CoverageMaterialPath = "Assets/_Project/Materials/M_LightCoverage.mat";
 
-        private static readonly Color GrowLightColor = new(0.72f, 0.82f, 1f, 1f);
+        private static readonly Color GrowLightColor = GrowLight.SharedVisualColor;
 
         [MenuItem("Growveld/Phase 25/Apply UX and Gameplay Fixes")]
         public static void ConfigureUxGameplayFixes()
@@ -100,10 +100,10 @@ namespace Growveld.Editor
                 source.enabled = true;
                 source.type = LightType.Point;
                 source.color = GrowLightColor;
-                source.intensity = 300f;
-                source.range = 8f;
+                source.intensity = GrowLight.SharedVisualIntensity;
+                source.range = GrowLight.SharedVisualRange;
                 source.useColorTemperature = false;
-                source.shadows = LightShadows.None;
+                ConfigureLightShadows(source);
 
                 Transform coverage = prefab.transform.Find("Coverage Preview");
                 if (coverage != null)
@@ -198,10 +198,10 @@ namespace Growveld.Editor
             source.spotAngle = 110f;
             source.innerSpotAngle = 75f;
             source.color = GrowLightColor;
-            source.intensity = 300f;
-            source.range = 8f;
+            source.intensity = GrowLight.SharedVisualIntensity;
+            source.range = GrowLight.SharedVisualRange;
             source.useColorTemperature = false;
-            source.shadows = LightShadows.None;
+            ConfigureLightShadows(source);
 
             GameObject coverage = CreatePrimitivePart(root.transform, "Coverage Preview", PrimitiveType.Cylinder, new Vector3(0f, -3.15f, 0f), new Vector3(12f, 0.025f, 12f), coverageMaterial, false);
             coverage.SetActive(false);
@@ -219,11 +219,11 @@ namespace Growveld.Editor
         private static void ConfigureGrowLightComponent(GrowLight growLight, Light source, LightType type)
         {
             SerializedObject settings = new(growLight);
-            settings.FindProperty("coverageRadius").floatValue = 6f;
+            settings.FindProperty("coverageRadius").floatValue = GrowLight.SharedCoverageRadius;
             settings.FindProperty("powerConsumptionKilowatts").floatValue = 1.2f;
             settings.FindProperty("lightSource").objectReferenceValue = source;
-            settings.FindProperty("visualIntensity").floatValue = 300f;
-            settings.FindProperty("visualRange").floatValue = 8f;
+            settings.FindProperty("visualIntensity").floatValue = GrowLight.SharedVisualIntensity;
+            settings.FindProperty("visualRange").floatValue = GrowLight.SharedVisualRange;
             settings.FindProperty("visualColor").colorValue = GrowLightColor;
             settings.FindProperty("visualLightType").enumValueIndex = (int)type;
             settings.FindProperty("spotAngle").floatValue = 110f;
@@ -249,6 +249,14 @@ namespace Growveld.Editor
             return part;
         }
 
+        private static void ConfigureLightShadows(Light source)
+        {
+            source.shadows = LightShadows.Soft;
+            source.shadowStrength = 0.72f;
+            source.shadowBias = 0.08f;
+            source.shadowNormalBias = 0.35f;
+        }
+
         private static TabletInventoryUI ConfigureTabletInventory(Scene scene, GameObject player, PlayerInventory inventory, ConstructionModeController construction, BusinessTabletController tabletController)
         {
             GameObject tabletCanvas = FindRoot(scene, "Business Tablet UI");
@@ -256,6 +264,13 @@ namespace Growveld.Editor
             Transform content = tablet != null ? tablet.Find("Content") : null;
             BusinessTabletUI tabletUI = tablet != null ? tablet.GetComponent<BusinessTabletUI>() : null;
             if (tablet == null || content == null || tabletUI == null) throw new MissingReferenceException("Business tablet hierarchy is incomplete.");
+
+            Transform oldPopupLayer = tablet.Find("Popup Layer");
+            if (oldPopupLayer != null) UnityEngine.Object.DestroyImmediate(oldPopupLayer.gameObject);
+            GameObject popupLayerObject = new("Popup Layer", typeof(RectTransform));
+            popupLayerObject.transform.SetParent(tablet, false);
+            RectTransform popupLayer = popupLayerObject.GetComponent<RectTransform>();
+            Stretch(popupLayer, 0f);
 
             Transform oldSection = content.Find("Inventory");
             if (oldSection != null) UnityEngine.Object.DestroyImmediate(oldSection.gameObject);
@@ -312,10 +327,10 @@ namespace Growveld.Editor
             emptyLabel.text = "No owned items yet.\nOrders appear here after delivery.";
 
             GameObject contextMenu = new("Item Context Menu", typeof(RectTransform), typeof(CanvasRenderer), typeof(Image));
-            contextMenu.transform.SetParent(section.transform, false);
+            contextMenu.transform.SetParent(popupLayer, false);
             RectTransform menuRect = contextMenu.GetComponent<RectTransform>();
-            menuRect.anchorMin = new Vector2(0f, 0f);
-            menuRect.anchorMax = new Vector2(0f, 0f);
+            menuRect.anchorMin = new Vector2(0.5f, 0.5f);
+            menuRect.anchorMax = new Vector2(0.5f, 0.5f);
             menuRect.pivot = new Vector2(0f, 1f);
             menuRect.sizeDelta = new Vector2(280f, 132f);
             contextMenu.GetComponent<Image>().color = new Color(0.055f, 0.105f, 0.07f, 0.99f);
@@ -345,6 +360,7 @@ namespace Growveld.Editor
             inventoryUiSettings.FindProperty("tabletController").objectReferenceValue = tabletController;
             inventoryUiSettings.FindProperty("rowsRoot").objectReferenceValue = rowsRect;
             inventoryUiSettings.FindProperty("emptyLabel").objectReferenceValue = emptyLabel;
+            inventoryUiSettings.FindProperty("popupLayer").objectReferenceValue = popupLayer;
             inventoryUiSettings.FindProperty("contextMenu").objectReferenceValue = contextMenu;
             inventoryUiSettings.FindProperty("contextTitle").objectReferenceValue = contextTitle;
             inventoryUiSettings.FindProperty("placeButton").objectReferenceValue = placeButton;
@@ -375,6 +391,7 @@ namespace Growveld.Editor
 
             CreateTabletTab(tablet, tabletUI, existingSections.Count - 1, "Inventory");
             ReflowTabletTabs(tablet);
+            popupLayer.SetAsLastSibling();
             section.SetActive(false);
 
             Transform constructionCopy = content.Find("Construction/Section Copy");
@@ -392,7 +409,6 @@ namespace Growveld.Editor
             {
                 player.GetComponent<FirstPersonController>(),
                 player.GetComponent<PlayerInteractor>(),
-                player.GetComponent<InventoryHotbarInput>(),
                 player.GetComponent<PlacementController>(),
                 construction
             };
@@ -409,7 +425,6 @@ namespace Growveld.Editor
             {
                 player.GetComponent<FirstPersonController>(),
                 player.GetComponent<PlayerInteractor>(),
-                player.GetComponent<InventoryHotbarInput>(),
                 player.GetComponent<PlacementController>(),
                 tablet,
                 construction
@@ -422,13 +437,13 @@ namespace Growveld.Editor
 
         private static void ConfigureConstructionHud(ConstructionModeController construction)
         {
-            PlacementHUD[] huds = UnityEngine.Object.FindObjectsByType<PlacementHUD>(FindObjectsInactive.Include, FindObjectsSortMode.None);
-            foreach (PlacementHUD hud in huds)
-            {
-                SerializedObject settings = new(hud);
-                settings.FindProperty("constructionMode").objectReferenceValue = construction;
-                settings.ApplyModifiedPropertiesWithoutUndo();
-            }
+            InteractionPromptUI prompt = UnityEngine.Object.FindFirstObjectByType<InteractionPromptUI>(FindObjectsInactive.Include);
+            if (prompt == null) return;
+            PlacementHUD hud = prompt.GetComponent<PlacementHUD>() ?? prompt.gameObject.AddComponent<PlacementHUD>();
+            SerializedObject settings = new(hud);
+            settings.FindProperty("placementController").objectReferenceValue = construction.GetComponent<PlacementController>();
+            settings.FindProperty("promptUI").objectReferenceValue = prompt;
+            settings.ApplyModifiedPropertiesWithoutUndo();
         }
 
         private static void ConfigureShop(ShopManager shop, ItemDefinition ceilingItem, Scene scene)
@@ -516,7 +531,8 @@ namespace Growveld.Editor
             else
             {
                 if (!Mathf.Approximately(existingLight.CoverageRadius, 6f)) failures.Add("existing grow-light coverage is not 6");
-                if (!Mathf.Approximately(existingLight.VisualIntensity, 300f)) failures.Add("existing grow-light intensity is not 300");
+                if (!Mathf.Approximately(existingLight.VisualIntensity, GrowLight.SharedVisualIntensity)) failures.Add("existing grow-light intensity is not shared visual intensity");
+                if (!Mathf.Approximately(existingLight.VisualRange, GrowLight.SharedVisualRange)) failures.Add("existing grow-light range is not shared visual range");
             }
             if (ceilingItem == null || ceilingDefinition == null || ceilingDefinition.Prefab == null) failures.Add("ceiling grow-light assets missing");
             else if (ceilingDefinition.PlacementSurface != PlacementSurface.Ceiling) failures.Add("ceiling grow light is not ceiling-only");

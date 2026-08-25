@@ -340,7 +340,6 @@ namespace Growveld.Editor
 
             GameObject hud = CreateCanvas("Polish HUD", 12);
             CreateCrosshair(hud.transform);
-            CreateQuickHelp(hud.transform);
 
             GameObject carryPanel = CreatePanel(hud.transform, "Carry Status", new Color(0.02f, 0.06f, 0.035f, 0.91f));
             RectTransform carryRect = carryPanel.GetComponent<RectTransform>();
@@ -384,7 +383,6 @@ namespace Growveld.Editor
             {
                 player.GetComponent<FirstPersonController>(),
                 player.GetComponent<PlayerInteractor>(),
-                player.GetComponent<InventoryHotbarInput>(),
                 placement,
                 tablet
             };

@@ -26,6 +26,7 @@ namespace Growveld.Interaction
         private IContextualInfoProvider currentContextProvider;
         private PlayerCarryController carryController;
         private ConstructionModeController constructionMode;
+        private PlacementController placementController;
 
         public IInteractable CurrentInteractable => currentInteractable;
         public IContextualInfoProvider CurrentContextProvider => currentContextProvider;
@@ -41,6 +42,7 @@ namespace Growveld.Interaction
             interactAction = playerInput.actions.FindAction("Player/Interact", true);
             carryController = GetComponent<PlayerCarryController>();
             constructionMode = GetComponent<ConstructionModeController>();
+            placementController = GetComponent<PlacementController>();
         }
 
         private void Update()
@@ -76,6 +78,12 @@ namespace Growveld.Interaction
 
         private void FindInteractionTarget()
         {
+            if (placementController != null && placementController.IsPlacing)
+            {
+                ClearInteractionTarget();
+                return;
+            }
+
             if (viewCamera == null)
             {
                 ClearInteractionTarget();
@@ -124,7 +132,7 @@ namespace Growveld.Interaction
             }
 
             currentInteractable = interactable;
-            promptUI?.ShowPrompt($"[E] {interactable.InteractionPrompt}");
+            RefreshPrompt();
         }
 
         private IInteractable FindFirstAvailableInteractable(Collider hitCollider)
@@ -158,7 +166,49 @@ namespace Growveld.Interaction
         {
             currentInteractable = null;
             currentContextProvider = null;
-            promptUI?.HidePrompt();
+            RefreshPrompt();
+        }
+
+        private void RefreshPrompt()
+        {
+            if (promptUI == null) return;
+
+            if (placementController != null && placementController.IsPlacing)
+            {
+                promptUI.ClearPrompt(this);
+                return;
+            }
+
+            bool carrying = carryController != null && carryController.IsCarrying;
+            bool targetAcceptsCarriedObject = currentInteractable is IHeldObjectReceiver or IInteractionWhileCarrying;
+            if (carrying && !targetAcceptsCarriedObject)
+            {
+                string carriedName = carryController.HeldObject != null
+                    ? carryController.HeldObject.DisplayName
+                    : "object";
+                promptUI.SetPrompt(this, $"[E] Drop {carriedName}", InteractionPromptUI.CarryPriority);
+                return;
+            }
+
+            if (currentInteractable == null)
+            {
+                promptUI.ClearPrompt(this);
+                return;
+            }
+
+            string action = currentInteractable is IContextualInteractionPrompt contextualPrompt
+                ? contextualPrompt.GetInteractionPrompt(gameObject)
+                : currentInteractable.InteractionPrompt;
+            if (string.IsNullOrWhiteSpace(action))
+            {
+                promptUI.ClearPrompt(this);
+                return;
+            }
+
+            int priority = currentInteractable is PlacedObject
+                ? InteractionPromptUI.ConstructionPriority
+                : InteractionPromptUI.FarmingPriority;
+            promptUI.SetPrompt(this, $"[E] {action}", priority);
         }
 
         private void OnDrawGizmosSelected()

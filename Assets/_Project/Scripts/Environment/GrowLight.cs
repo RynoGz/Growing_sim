@@ -8,14 +8,19 @@ namespace Growveld.Environment
     /// </summary>
     public sealed class GrowLight : MonoBehaviour
     {
+        public const float SharedCoverageRadius = 6f;
+        public const float SharedVisualIntensity = 55f;
+        public const float SharedVisualRange = 4.5f;
+        public static readonly Color SharedVisualColor = new(0.8f, 0.84f, 0.96f, 1f);
+
         private static readonly List<GrowLight> ActiveLights = new();
 
-        [SerializeField, Min(0.1f)] private float coverageRadius = 6f;
+        [SerializeField, Min(0.1f)] private float coverageRadius = SharedCoverageRadius;
         [SerializeField, Min(0f)] private float powerConsumptionKilowatts = 1.2f;
         [SerializeField] private Light lightSource;
-        [SerializeField, Min(0f)] private float visualIntensity = 300f;
-        [SerializeField, Min(0.1f)] private float visualRange = 8f;
-        [SerializeField] private Color visualColor = new(0.72f, 0.82f, 1f, 1f);
+        [SerializeField, Min(0f)] private float visualIntensity = SharedVisualIntensity;
+        [SerializeField, Min(0.1f)] private float visualRange = SharedVisualRange;
+        [SerializeField] private Color visualColor = new(0.8f, 0.84f, 0.96f, 1f);
         [SerializeField] private LightType visualLightType = LightType.Point;
         [SerializeField, Range(1f, 179f)] private float spotAngle = 110f;
         [SerializeField] private bool automaticSchedule = true;
@@ -146,6 +151,10 @@ namespace Growveld.Environment
             lightSource.type = visualLightType;
             if (visualLightType == LightType.Spot) lightSource.spotAngle = spotAngle;
             lightSource.useColorTemperature = false;
+            lightSource.shadows = LightShadows.Soft;
+            lightSource.shadowStrength = 0.72f;
+            lightSource.shadowBias = 0.08f;
+            lightSource.shadowNormalBias = 0.35f;
         }
     }
 }

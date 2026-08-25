@@ -17,6 +17,7 @@ namespace Growveld.UI
         [SerializeField] private BusinessTabletController tabletController;
         [SerializeField] private RectTransform rowsRoot;
         [SerializeField] private Text emptyLabel;
+        [SerializeField] private RectTransform popupLayer;
         [SerializeField] private GameObject contextMenu;
         [SerializeField] private Text contextTitle;
         [SerializeField] private Button placeButton;
@@ -93,13 +94,29 @@ namespace Growveld.UI
             if (contextTitle != null) contextTitle.text = item.DisplayName;
             if (contextMenu == null) return;
 
+            if (popupLayer != null && contextMenu.transform.parent != popupLayer)
+            {
+                contextMenu.transform.SetParent(popupLayer, false);
+            }
             contextMenu.SetActive(true);
+            contextMenu.transform.SetAsLastSibling();
             RectTransform menuRect = contextMenu.GetComponent<RectTransform>();
-            RectTransform parentRect = menuRect.parent as RectTransform;
+            menuRect.anchorMin = new Vector2(0.5f, 0.5f);
+            menuRect.anchorMax = new Vector2(0.5f, 0.5f);
+            RectTransform parentRect = popupLayer != null ? popupLayer : menuRect.parent as RectTransform;
             if (parentRect != null
                 && RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect, eventData.position, eventData.pressEventCamera, out Vector2 localPoint))
             {
-                menuRect.anchoredPosition = localPoint + new Vector2(18f, -18f);
+                Vector2 desired = localPoint + new Vector2(18f, -18f);
+                Rect bounds = parentRect.rect;
+                float padding = 10f;
+                float minimumX = bounds.xMin + padding + menuRect.rect.width * menuRect.pivot.x;
+                float maximumX = bounds.xMax - padding - menuRect.rect.width * (1f - menuRect.pivot.x);
+                float minimumY = bounds.yMin + padding + menuRect.rect.height * menuRect.pivot.y;
+                float maximumY = bounds.yMax - padding - menuRect.rect.height * (1f - menuRect.pivot.y);
+                desired.x = Mathf.Clamp(desired.x, minimumX, maximumX);
+                desired.y = Mathf.Clamp(desired.y, minimumY, maximumY);
+                menuRect.anchoredPosition = desired;
             }
         }
 
