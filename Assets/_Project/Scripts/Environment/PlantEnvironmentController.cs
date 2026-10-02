@@ -26,7 +26,10 @@ namespace Growveld.Environment
             {
                 if (currentRoom != null)
                 {
-                    float humidityFactor = currentRoom.GetHumidityGrowthMultiplier() / 1.12f;
+                    PlantDefinition strain = plant != null ? plant.Definition : null;
+                    float humidityFactor = strain != null
+                        ? currentRoom.GetHumidityGrowthMultiplier(strain.PreferredHumidityMinimum, strain.PreferredHumidityMaximum, strain.QualitySensitivity) / 1.12f
+                        : currentRoom.GetHumidityGrowthMultiplier() / 1.12f;
                     return Mathf.Clamp01(humidityFactor) * (coveringLight != null ? 1f : 0.5f);
                 }
 
@@ -78,10 +81,17 @@ namespace Growveld.Environment
                 ? GrowLight.FindCoveringLight(transform.position, currentRoom)
                 : null;
             outdoorEnvironment = currentRoom == null ? OutdoorEnvironment.Current : null;
+            PlantDefinition strainDefinition = plant != null ? plant.Definition : null;
+            float humidityMultiplier = currentRoom != null && strainDefinition != null
+                ? currentRoom.GetHumidityGrowthMultiplier(strainDefinition.PreferredHumidityMinimum, strainDefinition.PreferredHumidityMaximum, strainDefinition.QualitySensitivity)
+                : currentRoom != null ? currentRoom.GetHumidityGrowthMultiplier() : 1f;
+            float strainEnvironmentModifier = strainDefinition == null
+                ? 1f
+                : currentRoom != null ? strainDefinition.IndoorGrowthModifier : strainDefinition.OutdoorGrowthModifier;
             float multiplier = currentRoom != null
-                ? currentRoom.GetHumidityGrowthMultiplier() * (coveringLight != null ? 1.15f : 0f)
+                ? humidityMultiplier * (coveringLight != null ? 1.15f : 0f) * strainEnvironmentModifier
                 : outdoorEnvironment != null
-                    ? outdoorEnvironment.GetGrowthMultiplier()
+                    ? outdoorEnvironment.GetGrowthMultiplier() * strainEnvironmentModifier
                     : 1f;
             plant.SetExternalGrowthMultiplier(multiplier);
         }

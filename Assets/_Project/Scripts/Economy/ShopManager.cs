@@ -1,5 +1,6 @@
 using System;
 using Growveld.Inventory;
+using Growveld.Progression;
 using UnityEngine;
 
 namespace Growveld.Economy
@@ -12,16 +13,24 @@ namespace Growveld.Economy
         [SerializeField] private EconomyManager economy;
         [SerializeField] private DeliveryManager deliveryManager;
         [SerializeField] private ItemDefinition[] availableItems;
+        [SerializeField] private BusinessProgression progression;
 
         public event Action<string, bool> OrderResult;
 
         public ItemDefinition[] AvailableItems => availableItems;
+        public BusinessProgression Progression => progression;
 
         public bool TryOrder(ItemDefinition item, int quantity = 1)
         {
             if (item == null || quantity <= 0 || Array.IndexOf(availableItems, item) < 0)
             {
                 OrderResult?.Invoke("That item is not available in this shop.", false);
+                return false;
+            }
+
+            if (progression != null && !progression.IsUnlocked(item))
+            {
+                OrderResult?.Invoke($"{item.DisplayName} requires Business Level {item.RequiredLevel}.", false);
                 return false;
             }
 

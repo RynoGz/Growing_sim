@@ -8,6 +8,8 @@ using Growveld.Economy;
 using Growveld.Environment;
 using Growveld.Farming;
 using Growveld.Inventory;
+using Growveld.Progression;
+using Growveld.Automation;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -27,11 +29,14 @@ namespace Growveld.Saving
         [SerializeField] private DeliveryManager deliveries;
         [SerializeField] private FarmStockManager farmStock;
         [SerializeField] private UtilityManager utilities;
+        [SerializeField] private BusinessProgression progression;
 
         [Header("Asset catalogues")]
         [SerializeField] private ItemDefinition[] itemCatalog;
         [SerializeField] private PlaceableDefinition[] placeableCatalog;
         [SerializeField] private GameObject harvestBatchPrefab;
+        [SerializeField] private PlantDefinition[] strainCatalog;
+        [SerializeField] private PlantDefinition defaultStrain;
 
         [Header("Behaviour")]
         [SerializeField, Min(10f)] private float autosaveIntervalSeconds = 120f;
@@ -138,6 +143,7 @@ namespace Growveld.Saving
             CaptureHarvestBatches(data);
             CaptureDryingRacks(data);
             CaptureStorageAndRooms(data);
+            CaptureAutomation(data);
             CaptureDeliveries(data);
             CaptureStockAndUtilities(data);
             return data;
@@ -155,6 +161,7 @@ namespace Growveld.Saving
             RestoreLooseBatches(data);
             RestoreDryingRacks(data, placedObjects);
             RestoreStorageAndRooms(data, placedObjects);
+            RestoreAutomation(data, placedObjects);
             RestoreDeliveries(data);
             autosaveTimer = autosaveIntervalSeconds;
             isLoading = false;
@@ -201,7 +208,7 @@ namespace Growveld.Saving
             }
         }
 
-        private static void CapturePlants(GameSaveData data)
+        private void CapturePlants(GameSaveData data)
         {
             foreach (PlantingContainer container in FindObjectsByType<PlantingContainer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
             {
@@ -210,6 +217,7 @@ namespace Growveld.Saving
                 data.plants.Add(new PlantSaveData
                 {
                     containerKey = GetContainerKey(container),
+                    strainId = plant.Definition != null ? plant.Definition.PlantId : defaultStrain?.PlantId,
                     elapsedGrowthSeconds = plant.ElapsedGrowthSeconds,
                     water = plant.WaterLevel,
                     nutrients = plant.NutrientLevel,
@@ -267,6 +275,21 @@ namespace Growveld.Saving
             }
         }
 
+        private static void CaptureAutomation(GameSaveData data)
+        {
+            foreach (AutomationEquipment equipment in FindObjectsByType<AutomationEquipment>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+            {
+                PlacedObject placed = equipment.GetComponent<PlacedObject>();
+                if (placed == null) continue;
+                data.automation.Add(new AutomationSaveData
+                {
+                    placedObjectId = placed.PersistentId,
+                    operational = equipment.IsOperational,
+                    storedResource = equipment.StoredResource
+                });
+            }
+        }
+
         private void CaptureDeliveries(GameSaveData data)
         {
             if (deliveries == null) return;
@@ -286,10 +309,23 @@ namespace Growveld.Saving
         {
             if (farmStock != null)
             {
-                data.farmStock.low = farmStock.GetWeight(QualityGrade.Low);
-                data.farmStock.standard = farmStock.GetWeight(QualityGrade.Standard);
-                data.farmStock.premium = farmStock.GetWeight(QualityGrade.Premium);
-                data.farmStock.topGrade = farmStock.GetWeight(QualityGrade.TopGrade);
+                foreach (FarmStockEntry entry in farmStock.Entries)
+                {
+                    if (entry == null || entry.Strain == null || entry.WeightKilograms <= 0f) continue;
+                    data.farmStock.entries.Add(new FarmStockEntrySaveData
+                    {
+                        strainId = entry.StrainId,
+                        qualityGrade = entry.QualityGrade,
+                        weightKilograms = entry.WeightKilograms
+                    });
+                }
+            }
+            if (progression != null)
+            {
+                data.progression.currentLevel = progression.CurrentLevel;
+                data.progression.currentExperience = progression.CurrentExperience;
+                data.progression.lifetimeExperience = progression.LifetimeExperience;
+                data.progression.lifetimeSales = progression.LifetimeSales;
             }
             if (utilities != null)
             {
@@ -348,11 +384,13 @@ namespace Growveld.Saving
                 inventory.SelectSlot(data.selectedInventorySlot);
                 inventory.NotifyRestored();
             }
-            farmStock?.RestoreStock(data.farmStock.low, data.farmStock.standard, data.farmStock.premium, data.farmStock.topGrade);
+            RestoreFarmStock(data);
             utilities?.RestoreUsage(data.utilities.electricityKilowattHours, data.utilities.waterLitres, data.utilities.currentDay, 0f);
+            ProgressionSaveData savedProgression = data.progression ?? new ProgressionSaveData();
+            progression?.Restore(savedProgression.currentLevel, savedProgression.currentExperience, savedProgression.lifetimeExperience, savedProgression.lifetimeSales);
         }
 
-        private static void RestorePlants(GameSaveData data, Dictionary<string, PlacedObject> placedObjects)
+        private void RestorePlants(GameSaveData data, Dictionary<string, PlacedObject> placedObjects)
         {
             Dictionary<string, PlantingContainer> containers = new();
             foreach (PlantingContainer container in FindObjectsByType<PlantingContainer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
@@ -363,7 +401,8 @@ namespace Growveld.Saving
             foreach (PlantSaveData saved in data.plants)
             {
                 if (!containers.TryGetValue(saved.containerKey, out PlantingContainer container)) continue;
-                PlantInstance plant = container.SpawnRestoredPlant();
+                PlantDefinition strain = FindStrain(saved.strainId) ?? defaultStrain;
+                PlantInstance plant = container.SpawnRestoredPlant(strain);
                 if (plant == null) continue;
                 plant.RestoreGrowth(saved.elapsedGrowthSeconds);
                 plant.RestoreCare(saved.water, saved.nutrients, saved.health);
@@ -406,6 +445,39 @@ namespace Growveld.Saving
             }
         }
 
+        private static void RestoreAutomation(GameSaveData data, Dictionary<string, PlacedObject> placedObjects)
+        {
+            if (data.automation == null) return;
+            foreach (AutomationSaveData saved in data.automation)
+            {
+                if (placedObjects.TryGetValue(saved.placedObjectId, out PlacedObject placed))
+                {
+                    placed.GetComponent<AutomationEquipment>()?.RestoreAutomation(saved.operational, saved.storedResource);
+                }
+            }
+        }
+
+        private void RestoreFarmStock(GameSaveData data)
+        {
+            if (farmStock == null) return;
+            List<RestoredFarmStockEntry> restored = new();
+            if (data.farmStock?.entries != null)
+            {
+                foreach (FarmStockEntrySaveData entry in data.farmStock.entries)
+                {
+                    PlantDefinition strain = FindStrain(entry.strainId) ?? defaultStrain;
+                    if (strain != null && entry.weightKilograms > 0f) restored.Add(new RestoredFarmStockEntry(strain, entry.qualityGrade, entry.weightKilograms));
+                }
+            }
+            if (restored.Count > 0)
+            {
+                farmStock.RestoreEntries(restored);
+                return;
+            }
+            FarmStockSaveData legacy = data.farmStock ?? new FarmStockSaveData();
+            farmStock.RestoreStock(legacy.low, legacy.standard, legacy.premium, legacy.topGrade);
+        }
+
         private void RestoreDeliveries(GameSaveData data)
         {
             if (deliveries == null) return;
@@ -423,7 +495,7 @@ namespace Growveld.Saving
             if (harvestBatchPrefab == null || saved == null) return null;
             GameObject instance = Instantiate(harvestBatchPrefab, position, rotation);
             HarvestBatch batch = instance.GetComponent<HarvestBatch>();
-            batch?.RestoreBatch(saved.batchId, saved.weightKilograms, saved.qualityGrade, saved.status);
+            batch?.RestoreBatch(saved.batchId, saved.weightKilograms, saved.qualityGrade, FindStrain(saved.strainId) ?? defaultStrain, saved.status);
             return batch;
         }
 
@@ -431,6 +503,10 @@ namespace Growveld.Saving
         {
             if (itemCatalog == null) return null;
             foreach (ItemDefinition item in itemCatalog) if (item != null && item.ItemId == itemId) return item;
+            if (itemId == "seed")
+            {
+                foreach (ItemDefinition item in itemCatalog) if (item != null && item.StrainDefinition == defaultStrain) return item;
+            }
             return null;
         }
 
@@ -441,6 +517,16 @@ namespace Growveld.Saving
             return null;
         }
 
+        private PlantDefinition FindStrain(string strainId)
+        {
+            if (string.IsNullOrWhiteSpace(strainId)) return defaultStrain;
+            if (strainCatalog != null)
+            {
+                foreach (PlantDefinition strain in strainCatalog) if (strain != null && strain.PlantId == strainId) return strain;
+            }
+            return defaultStrain;
+        }
+
         private static HarvestBatchSaveData CreateBatchSaveData(HarvestBatch batch)
         {
             return new HarvestBatchSaveData
@@ -449,6 +535,7 @@ namespace Growveld.Saving
                 weightKilograms = batch.WeightKilograms,
                 qualityGrade = batch.QualityGrade,
                 status = batch.Status,
+                strainId = batch.StrainId,
                 position = new Vector3Data(batch.transform.position),
                 rotation = new QuaternionData(batch.transform.rotation)
             };

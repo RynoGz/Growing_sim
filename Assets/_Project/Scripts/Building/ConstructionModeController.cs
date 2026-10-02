@@ -1,6 +1,7 @@
 using System;
 using Growveld.Interaction;
 using Growveld.Inventory;
+using Growveld.Player;
 using Growveld.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -14,6 +15,7 @@ namespace Growveld.Building
     {
         [SerializeField] private PlacementController placementController;
         [SerializeField] private PlayerInteractor playerInteractor;
+        [SerializeField] private PlayerInputStateController inputState;
 
         public event Action<bool> ModeChanged;
 
@@ -24,6 +26,7 @@ namespace Growveld.Building
         {
             if (placementController == null) placementController = GetComponent<PlacementController>();
             if (playerInteractor == null) playerInteractor = GetComponent<PlayerInteractor>();
+            if (inputState == null) inputState = GetComponent<PlayerInputStateController>();
         }
 
         private void Update()
@@ -59,6 +62,7 @@ namespace Growveld.Building
         {
             if (IsActive) return;
             IsActive = true;
+            inputState?.SetConstructionActive(true);
             ModeChanged?.Invoke(true);
         }
 
@@ -68,6 +72,7 @@ namespace Growveld.Building
             LastExitFrame = Time.frameCount;
             placementController?.CancelPlacement();
             IsActive = false;
+            inputState?.SetConstructionActive(false);
             ModeChanged?.Invoke(false);
         }
 

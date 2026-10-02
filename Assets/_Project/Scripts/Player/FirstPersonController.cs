@@ -27,6 +27,7 @@ namespace Growveld.Player
 
         private CharacterController characterController;
         private PlayerInput playerInput;
+        private PlayerInputStateController inputState;
         private InputAction moveAction;
         private InputAction lookAction;
         private InputAction sprintAction;
@@ -38,6 +39,8 @@ namespace Growveld.Player
         {
             characterController = GetComponent<CharacterController>();
             playerInput = GetComponent<PlayerInput>();
+            inputState = GetComponent<PlayerInputStateController>();
+            if (inputState == null) inputState = gameObject.AddComponent<PlayerInputStateController>();
 
             if (cameraTransform == null)
             {
@@ -50,31 +53,20 @@ namespace Growveld.Player
             sprintAction = playerInput.actions.FindAction("Player/Sprint", true);
         }
 
-        private void OnEnable()
-        {
-            LockCursor();
-        }
-
-        private void OnDisable()
-        {
-            UnlockCursor();
-        }
-
         private void Update()
         {
-            UpdateCursorState();
+            if (inputState != null && !inputState.AllowsMovementAndLook) return;
 
-            if (Cursor.lockState == CursorLockMode.Locked)
-            {
-                ApplyMouseLook();
-            }
-
-            ApplyMovement();
+            // Read both actions every frame and apply them independently. Neither path is
+            // conditional on the other action, sprint state, or incidental cursor changes.
+            Vector2 lookInput = lookAction.ReadValue<Vector2>();
+            Vector2 movementInput = moveAction.ReadValue<Vector2>();
+            ApplyMouseLook(lookInput);
+            ApplyMovement(movementInput, sprintAction.IsPressed(), Time.deltaTime);
         }
 
-        private void ApplyMovement()
+        private void ApplyMovement(Vector2 movementInput, bool sprintPressed, float deltaTime)
         {
-            Vector2 movementInput = moveAction.ReadValue<Vector2>();
             Vector3 movementDirection = transform.right * movementInput.x
                 + transform.forward * movementInput.y;
 
@@ -83,29 +75,27 @@ namespace Growveld.Player
                 movementDirection.Normalize();
             }
 
-            bool isSprinting = sprintAction.IsPressed() && movementDirection.sqrMagnitude > 0.01f;
+            bool isSprinting = sprintPressed && movementDirection.sqrMagnitude > 0.01f;
             float targetSpeed = isSprinting ? sprintSpeed : walkSpeed;
             Vector3 targetHorizontalVelocity = movementDirection * targetSpeed;
 
             horizontalVelocity = Vector3.MoveTowards(
                 horizontalVelocity,
                 targetHorizontalVelocity,
-                acceleration * Time.deltaTime);
+                acceleration * Mathf.Max(0f, deltaTime));
 
             if (characterController.isGrounded && verticalVelocity < 0f)
             {
                 verticalVelocity = groundedForce;
             }
 
-            verticalVelocity += gravity * Time.deltaTime;
+            verticalVelocity += gravity * Mathf.Max(0f, deltaTime);
             Vector3 finalVelocity = horizontalVelocity + Vector3.up * verticalVelocity;
-            characterController.Move(finalVelocity * Time.deltaTime);
+            characterController.Move(finalVelocity * Mathf.Max(0f, deltaTime));
         }
 
-        private void ApplyMouseLook()
+        private void ApplyMouseLook(Vector2 lookInput)
         {
-            Vector2 lookInput = lookAction.ReadValue<Vector2>();
-
             transform.Rotate(Vector3.up, lookInput.x * mouseSensitivity, Space.Self);
 
             cameraPitch -= lookInput.y * mouseSensitivity;
@@ -117,31 +107,5 @@ namespace Growveld.Player
             }
         }
 
-        private void UpdateCursorState()
-        {
-            if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
-            {
-                UnlockCursor();
-            }
-
-            if (Cursor.lockState != CursorLockMode.Locked
-                && Mouse.current != null
-                && Mouse.current.leftButton.wasPressedThisFrame)
-            {
-                LockCursor();
-            }
-        }
-
-        private static void LockCursor()
-        {
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
-        }
-
-        private static void UnlockCursor()
-        {
-            Cursor.lockState = CursorLockMode.None;
-            Cursor.visible = true;
-        }
     }
 }

@@ -125,6 +125,17 @@ namespace Growveld.Farming
             return null;
         }
 
+        /// <summary>Completes every currently drying slot through the normal slot-advance path.</summary>
+        public int CompleteAllDrying()
+        {
+            int completed = 0;
+            foreach (DryingSlotState slot in slots)
+            {
+                if (slot != null && slot.Advance(float.MaxValue)) completed++;
+            }
+            return completed;
+        }
+
         public bool RestoreBatchAtSlot(int slotIndex, HarvestBatch batch, float remainingSeconds)
         {
             EnsureSlots();

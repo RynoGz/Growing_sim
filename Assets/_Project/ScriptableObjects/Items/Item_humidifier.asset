@@ -1,0 +1,32 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1309d2c43fd34f54ab783938f2a7a3b6, type: 3}
+  m_Name: Item_humidifier
+  m_EditorClassIdentifier: Assembly-CSharp::Growveld.Inventory.ItemDefinition
+  itemId: humidifier
+  displayName: Humidifier
+  description: Raises grow-room humidity toward the recommended strain target.
+  category: 2
+  stackable: 1
+  maximumStack: 10
+  purchasePrice: 6200
+  displayColor: {r: 1, g: 1, b: 1, a: 1}
+  icon: {fileID: 0}
+  placeableDefinition: {fileID: 11400000, guid: 6de233438f4c4894c90e73c48c38d8aa, type: 2}
+  requiredLevel: 5
+  tooltipDetails: 'Room device
+
+    Electricity Usage: Low
+
+    Automatic recommended
+    target'
+  strainDefinition: {fileID: 0}

@@ -1,6 +1,7 @@
 using System;
 using Growveld.Core;
 using Growveld.Environment;
+using Growveld.Automation;
 using UnityEngine;
 
 namespace Growveld.Economy
@@ -42,6 +43,10 @@ namespace Growveld.Economy
             {
                 if (growLight != null && growLight.IsActive) activeKilowatts += growLight.PowerConsumptionKilowatts;
             }
+            foreach (AutomationEquipment equipment in AutomationEquipment.GetActiveEquipment())
+            {
+                if (equipment != null && equipment.IsDrawingPower) activeKilowatts += equipment.PowerConsumptionKilowatts;
+            }
             // Utilities follow the accelerated simulation clock. At the prototype's
             // 30-minute day, an 18-hour light schedule must still consume 18 game-hours.
             float elapsedHours = gameTime != null
@@ -72,6 +77,13 @@ namespace Growveld.Economy
         {
             if (settings == null) return;
             currentWaterLitres += settings.WaterLitresPerWatering;
+            UsageChanged?.Invoke();
+        }
+
+        public void RecordWaterLitres(float litres)
+        {
+            if (litres <= 0f) return;
+            currentWaterLitres += litres;
             UsageChanged?.Invoke();
         }
 

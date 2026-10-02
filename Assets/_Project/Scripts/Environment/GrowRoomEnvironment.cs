@@ -64,20 +64,30 @@ namespace Growveld.Environment
 
         public float GetHumidityGrowthMultiplier()
         {
-            if (humidity >= idealMinimumHumidity && humidity <= idealMaximumHumidity)
+            return GetHumidityGrowthMultiplier(idealMinimumHumidity, idealMaximumHumidity, 1f);
+        }
+
+        public float GetHumidityGrowthMultiplier(float preferredMinimum, float preferredMaximum, float sensitivity)
+        {
+            float minimum = Mathf.Min(preferredMinimum, preferredMaximum);
+            float maximum = Mathf.Max(preferredMinimum, preferredMaximum);
+            if (humidity >= minimum && humidity <= maximum)
             {
                 return 1.12f;
             }
 
-            float distanceFromIdeal = humidity < idealMinimumHumidity
-                ? idealMinimumHumidity - humidity
-                : humidity - idealMaximumHumidity;
-            return Mathf.Lerp(1f, 0.5f, Mathf.Clamp01(distanceFromIdeal / 30f));
+            float distanceFromIdeal = humidity < minimum ? minimum - humidity : humidity - maximum;
+            return Mathf.Lerp(1f, 0.5f, Mathf.Clamp01(distanceFromIdeal * Mathf.Max(0.1f, sensitivity) / 30f));
         }
 
         public void SetHumidity(float newHumidity)
         {
             humidity = Mathf.Clamp(newHumidity, 0f, 100f);
+        }
+
+        public void AdjustHumidity(float delta)
+        {
+            humidity = Mathf.Clamp(humidity + delta, 0f, 100f);
         }
 
         public static GrowRoomEnvironment FindContainingRoom(Vector3 worldPosition)

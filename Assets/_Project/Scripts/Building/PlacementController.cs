@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Growveld.Economy;
 using Growveld.Inventory;
+using Growveld.Player;
 using Growveld.UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -29,6 +30,7 @@ namespace Growveld.Building
         private float placementYaw;
         private bool placementValid;
         private ConstructionModeController constructionMode;
+        private PlayerInputStateController inputState;
 
         public event Action<bool> PlacementModeChanged;
         public event Action<PlaceableDefinition, bool, bool> PreviewChanged;
@@ -43,6 +45,7 @@ namespace Growveld.Building
             if (viewCamera == null) viewCamera = GetComponentInChildren<Camera>(true);
             if (inventory == null) inventory = GetComponent<PlayerInventory>();
             constructionMode = GetComponent<ConstructionModeController>();
+            inputState = GetComponent<PlayerInputStateController>();
         }
 
         private void Update()
@@ -139,6 +142,7 @@ namespace Growveld.Building
             previewObject.name = $"{definition.DisplayName} Placement Preview";
             PreparePreview(previewObject);
             landManager?.SetConstructionBoundariesVisible(true);
+            inputState?.SetPlacementActive(true);
             PlacementModeChanged?.Invoke(true);
             UpdatePreview();
             return true;
@@ -167,7 +171,13 @@ namespace Growveld.Building
             Transform coverage = preview.transform.Find("Coverage Preview");
             if (coverage != null)
             {
-                coverage.gameObject.SetActive(activeDefinition.LightCoverageRadius > 0f);
+                bool visible = activeDefinition.CoverageRadius > 0f;
+                coverage.gameObject.SetActive(visible);
+                if (visible)
+                {
+                    float diameter = activeDefinition.CoverageRadius * 2f;
+                    coverage.localScale = new Vector3(diameter, 0.03f, diameter);
+                }
             }
         }
 
@@ -346,6 +356,7 @@ namespace Growveld.Building
             placementValid = false;
             previewRenderers.Clear();
             landManager?.SetConstructionBoundariesVisible(false);
+            inputState?.SetPlacementActive(false);
             PlacementModeChanged?.Invoke(false);
         }
     }

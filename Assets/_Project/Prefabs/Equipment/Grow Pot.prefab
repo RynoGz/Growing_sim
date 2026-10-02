@@ -61,12 +61,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c5688cbca9404fa46ac008b408b3e294, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Growveld.Farming.PlantingContainer
-  plantDefinition: {fileID: 11400000, guid: 6c6fc440bf0047a4a95f44c6bf727ce8, type: 2}
+  plantDefinition: {fileID: 11400000, guid: a691d14251babed42968038044b34249, type: 2}
   seedItem: {fileID: 11400000, guid: 13ee720e8b38a1d4694d8e268d937b55, type: 2}
+  seedCatalog:
+  - {fileID: 11400000, guid: 13ee720e8b38a1d4694d8e268d937b55, type: 2}
+  - {fileID: 11400000, guid: 61f670d225e83f64ba24b604c6b9f6a6, type: 2}
+  - {fileID: 11400000, guid: df13d55faf8795a498dbf805de063b3b, type: 2}
+  - {fileID: 11400000, guid: c6f9387956b01f846b75fd16626bbc2c, type: 2}
   plantPrefab: {fileID: 8043868304584446466, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
   plantSocket: {fileID: 4711564240605809942}
   currentPlant: {fileID: 0}
   outdoor: 0
+  requireOwnedLand: 0
+  landManager: {fileID: 0}
 --- !u!1 &2442726060643478769
 GameObject:
   m_ObjectHideFlags: 0

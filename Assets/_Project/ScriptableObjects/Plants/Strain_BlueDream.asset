@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3eca711f4cf94ac4680083272492ce0a, type: 3}
+  m_Name: Strain_BlueDream
+  m_EditorClassIdentifier: Assembly-CSharp::Growveld.Farming.PlantDefinition
+  plantId: blue_dream
+  displayName: Blue Dream
+  shortDescription: A popular hybrid known for strong yields and versatility. It
+    performs well both indoors and outdoors, making it a dependable option when expanding
+    your farm.
+  guidanceText: Easy-Moderate; versatile high yield.
+  difficulty: Easy-Moderate
+  growthLabel: Medium
+  yieldLabel: High
+  indoorSuitability: Very Good
+  outdoorSuitability: Very Good
+  unlockLevel: 3
+  seedPurchasePrice: 300
+  baseSellingPricePerKilogram: 1550
+  maximumQualityPotential: 100
+  indoorGrowthModifier: 1.05
+  outdoorGrowthModifier: 1.05
+  waterConsumptionModifier: 1.1
+  nutrientConsumptionModifier: 1.15
+  preferredHumidityMinimum: 52
+  preferredHumidityMaximum: 66
+  qualitySensitivity: 0.9
+  shopIcon: {fileID: 0}
+  plantPrefab: {fileID: 8043868304584446466, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+  germinationSeconds: 120
+  seedlingSeconds: 240
+  vegetativeSeconds: 420
+  floweringSeconds: 720
+  baseYieldKilograms: 0.72
+  maximumWater: 100
+  maximumNutrients: 100
+  waterConsumptionPerRealMinute: 4
+  nutrientConsumptionPerRealMinute: 2
+  waterPerUse: 45
+  nutrientsPerDose: 35
+  healthLossPerCriticalMinute: 8
+  healthRecoveryPerGoodMinute: 2
+  qualitySettings: {fileID: 11400000, guid: 974d0af09f4ed9c48af1fc90101e926c, type: 2}

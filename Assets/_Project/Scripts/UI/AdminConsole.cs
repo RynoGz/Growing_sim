@@ -33,6 +33,7 @@ namespace Growveld.UI
         private Text outputText;
         private bool isOpen;
         private float previousTimeScale = 1f;
+        private PlayerInputStateController inputState;
 
         public bool IsOpen => isOpen;
 
@@ -57,6 +58,7 @@ namespace Growveld.UI
 
         private void Awake()
         {
+            inputState = FindFirstObjectByType<PlayerInputStateController>();
             BuildInterface();
             consoleRoot.SetActive(false);
         }
@@ -99,6 +101,8 @@ namespace Growveld.UI
 
             if (open)
             {
+                if (inputState == null) inputState = FindFirstObjectByType<PlayerInputStateController>();
+                inputState?.SetAdminConsoleOpen(true);
                 PauseAndHelpController pause = FindFirstObjectByType<PauseAndHelpController>();
                 if (pause != null && pause.IsPaused) pause.Resume();
                 FindFirstObjectByType<BusinessTabletController>()?.SetOpen(false);
@@ -110,8 +114,6 @@ namespace Growveld.UI
                 consoleRoot.SetActive(true);
                 commandInput.text = string.Empty;
                 commandInput.ActivateInputField();
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
             }
             else
             {
@@ -148,8 +150,7 @@ namespace Growveld.UI
             }
 
             suspendedBehaviours.Clear();
-            Cursor.lockState = CursorLockMode.Locked;
-            Cursor.visible = false;
+            inputState?.SetAdminConsoleOpen(false);
         }
 
         private void SubmitCommand(string rawCommand)
@@ -184,10 +185,13 @@ namespace Growveld.UI
             switch (arguments[0].ToLowerInvariant())
             {
                 case "help":
-                    return "grow | time <hour or HH:MM> | money <amount> | setmoney <amount> | save | load | clear";
+                    return "grow | dryall | time <hour or HH:MM> | money <amount> | setmoney <amount> | save | load | clear";
                 case "grow":
                 case "growall":
                     return GrowAllPlants();
+                case "dryall":
+                case "dryallracks":
+                    return DryAllRacks();
                 case "time":
                     return SetTime(arguments);
                 case "money":
@@ -301,6 +305,19 @@ namespace Growveld.UI
             return plants.Length == 0
                 ? "No planted crops were found."
                 : $"Instantly grew {plants.Length} planted crop{(plants.Length == 1 ? string.Empty : "s")}.";
+        }
+
+        private static string DryAllRacks()
+        {
+            int completed = 0;
+            foreach (DryingRack rack in FindObjectsByType<DryingRack>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+            {
+                if (rack != null) completed += rack.CompleteAllDrying();
+            }
+
+            return completed > 0
+                ? "Admin: All drying rack batches have been fully dried."
+                : "Admin: No active drying batches found.";
         }
 
         private static string SetTime(string[] arguments)

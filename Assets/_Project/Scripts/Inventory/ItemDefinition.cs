@@ -1,4 +1,5 @@
 using Growveld.Building;
+using Growveld.Farming;
 using UnityEngine;
 
 namespace Growveld.Inventory
@@ -30,6 +31,9 @@ namespace Growveld.Inventory
         [SerializeField] private Color displayColor = Color.white;
         [SerializeField] private Sprite icon;
         [SerializeField] private PlaceableDefinition placeableDefinition;
+        [SerializeField, Min(1)] private int requiredLevel = 1;
+        [SerializeField, TextArea] private string tooltipDetails;
+        [SerializeField] private PlantDefinition strainDefinition;
 
         public string ItemId => itemId;
         public string DisplayName => displayName;
@@ -41,5 +45,28 @@ namespace Growveld.Inventory
         public Color DisplayColor => displayColor;
         public Sprite Icon => icon;
         public PlaceableDefinition PlaceableDefinition => placeableDefinition;
+        public int RequiredLevel => Mathf.Max(1, requiredLevel);
+        public string TooltipDetails => tooltipDetails;
+        public PlantDefinition StrainDefinition => strainDefinition;
+        public bool IsSeed => category == ItemCategory.Seeds && strainDefinition != null;
+
+        public string BuildShopTooltip()
+        {
+            if (strainDefinition != null)
+            {
+                return $"{strainDefinition.DisplayName}\n\n{strainDefinition.ShortDescription}\n\n" +
+                    $"Difficulty: {strainDefinition.Difficulty}\n" +
+                    $"Growth: {strainDefinition.GrowthLabel}\n" +
+                    $"Yield: {strainDefinition.YieldLabel}\n" +
+                    $"Indoor: {strainDefinition.IndoorSuitability}\n" +
+                    $"Outdoor: {strainDefinition.OutdoorSuitability}\n" +
+                    $"Unlocks: Level {RequiredLevel}\n" +
+                    $"Seed Price: R{PurchasePrice:N0}\n" +
+                    $"Market Value: R{strainDefinition.BaseSellingPricePerKilogram:N0} / kg";
+            }
+
+            string details = string.IsNullOrWhiteSpace(tooltipDetails) ? Description : tooltipDetails;
+            return $"{DisplayName}\n\n{details}\n\nUnlocks: Level {RequiredLevel}\nPrice: R{PurchasePrice:N0}";
+        }
     }
 }

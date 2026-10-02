@@ -1,0 +1,29 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1309d2c43fd34f54ab783938f2a7a3b6, type: 3}
+  m_Name: Item_large_drying_rack
+  m_EditorClassIdentifier: Assembly-CSharp::Growveld.Inventory.ItemDefinition
+  itemId: large_drying_rack
+  displayName: Large Drying Rack
+  description: An eight-slot rack for larger harvest batches.
+  category: 4
+  stackable: 1
+  maximumStack: 10
+  purchasePrice: 9000
+  displayColor: {r: 1, g: 1, b: 1, a: 1}
+  icon: {fileID: 0}
+  placeableDefinition: {fileID: 11400000, guid: 9c0269d2f93141c46aab163eaa43445d, type: 2}
+  requiredLevel: 5
+  tooltipDetails: 'Capacity: 8 batches
+
+    Drying Speed: Slightly Faster'
+  strainDefinition: {fileID: 0}

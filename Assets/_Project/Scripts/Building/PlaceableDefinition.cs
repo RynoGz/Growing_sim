@@ -24,6 +24,7 @@ namespace Growveld.Building
         [SerializeField, Range(1f, 90f)] private float rotationStep = 15f;
         [SerializeField, Range(0f, 1f)] private float sellRefundFraction = 0.7f;
         [SerializeField, Min(0f)] private float lightCoverageRadius;
+        [SerializeField, Min(0f)] private float automationCoverageRadius;
 
         public string PlaceableId => placeableId;
         public ItemDefinition ItemDefinition => itemDefinition;
@@ -34,6 +35,8 @@ namespace Growveld.Building
         public float RotationStep => rotationStep;
         public float SellRefundFraction => sellRefundFraction;
         public float LightCoverageRadius => lightCoverageRadius;
+        public float AutomationCoverageRadius => automationCoverageRadius;
+        public float CoverageRadius => Mathf.Max(lightCoverageRadius, automationCoverageRadius);
         public float PurchasePrice => itemDefinition != null ? itemDefinition.PurchasePrice : 0f;
         public string DisplayName => itemDefinition != null ? itemDefinition.DisplayName : name;
     }

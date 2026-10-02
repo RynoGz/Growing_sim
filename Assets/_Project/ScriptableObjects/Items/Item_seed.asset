@@ -12,12 +12,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1309d2c43fd34f54ab783938f2a7a3b6, type: 3}
   m_Name: Item_seed
   m_EditorClassIdentifier: Assembly-CSharp::Growveld.Inventory.ItemDefinition
-  itemId: seed
-  displayName: Generic Seeds
-  description: One generic crop seed.
+  itemId: seed_northern_lights
+  displayName: Northern Lights Seeds
+  description: Easy and forgiving; strongest indoors.
   category: 0
   stackable: 1
-  maximumStack: 20
-  purchasePrice: 120
-  displayColor: {r: 0.46, g: 0.72, b: 0.28, a: 1}
+  maximumStack: 50
+  purchasePrice: 180
+  displayColor: {r: 0.3, g: 0.72, b: 0.35, a: 1}
+  icon: {fileID: 0}
   placeableDefinition: {fileID: 0}
+  requiredLevel: 1
+  tooltipDetails: 
+  strainDefinition: {fileID: 11400000, guid: a691d14251babed42968038044b34249, type: 2}

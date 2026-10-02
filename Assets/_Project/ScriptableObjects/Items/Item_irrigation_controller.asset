@@ -1,0 +1,33 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1309d2c43fd34f54ab783938f2a7a3b6, type: 3}
+  m_Name: Item_irrigation_controller
+  m_EditorClassIdentifier: Assembly-CSharp::Growveld.Inventory.ItemDefinition
+  itemId: irrigation_controller
+  displayName: Irrigation Controller
+  description: Automatically waters plants inside its coverage area, reducing manual
+    watering.
+  category: 2
+  stackable: 1
+  maximumStack: 10
+  purchasePrice: 8500
+  displayColor: {r: 1, g: 1, b: 1, a: 1}
+  icon: {fileID: 0}
+  placeableDefinition: {fileID: 11400000, guid: f910a18a25e4474429751bf13b9a0982, type: 2}
+  requiredLevel: 4
+  tooltipDetails: 'Coverage: Medium
+
+    Water Usage: Moderate
+
+    Electricity Usage:
+    Low'
+  strainDefinition: {fileID: 0}

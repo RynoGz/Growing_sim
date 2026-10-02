@@ -27,10 +27,11 @@ namespace Growveld.UI
         {
             if (farmStock == null || stockText == null) return;
             StringBuilder builder = new("DRIED FARM STOCK\n\n");
-            foreach (QualityGrade grade in System.Enum.GetValues(typeof(QualityGrade)))
+            foreach (FarmStockEntry entry in farmStock.Entries)
             {
-                string name = qualitySettings != null ? qualitySettings.GetDisplayName(grade) : grade.ToString();
-                builder.AppendLine($"{name}: {farmStock.GetWeight(grade):0.00} kg");
+                if (entry == null || entry.WeightKilograms <= 0f) continue;
+                string name = qualitySettings != null ? qualitySettings.GetDisplayName(entry.QualityGrade) : entry.QualityGrade.ToString();
+                builder.AppendLine($"{entry.Strain?.DisplayName ?? "Northern Lights"}\n{name}: {entry.WeightKilograms:0.00} kg\n");
             }
             builder.AppendLine($"\nTotal: {farmStock.TotalKilograms:0.00} kg");
             stockText.text = builder.ToString();

@@ -5,6 +5,7 @@ using Growveld.Environment;
 using Growveld.Economy;
 using Growveld.Carrying;
 using Growveld.UI;
+using Growveld.Automation;
 using UnityEngine;
 
 namespace Growveld.Farming
@@ -73,7 +74,9 @@ namespace Growveld.Farming
                 string gradeName = definition.QualitySettings != null
                     ? definition.QualitySettings.GetDisplayName(CurrentQualityGrade)
                     : CurrentQualityGrade.ToString();
-                return $"{definition.DisplayName}\nStage: {FormatStage(currentStage)}\nGrowth: {GrowthPercent:0}%\nWater: {WaterStatus}\nNutrients: {NutrientStatus}\nHealth: {health:0}%\nQuality: {gradeName}\nYield potential: {yieldPotential * 100f:0}%{environmentInfo}";
+                string irrigation = IrrigationController.FindCovering(transform.position) != null ? "Irrigation Connected" : "Manual Watering";
+                string dosing = NutrientDoser.FindCovering(transform.position) != null ? "Nutrient Doser Connected" : "Manual Nutrients";
+                return $"{definition.DisplayName}\nStage: {FormatStage(currentStage)}\nGrowth: {GrowthPercent:0}%\nWater: {WaterStatus} ({irrigation})\nNutrients: {NutrientStatus} ({dosing})\nHealth: {health:0}%\nQuality: {gradeName}\nYield potential: {yieldPotential * 100f:0}%{environmentInfo}";
             }
         }
 
@@ -81,6 +84,14 @@ namespace Growveld.Farming
         {
             environmentController = GetComponent<PlantEnvironmentController>();
             utilityManager = FindFirstObjectByType<UtilityManager>();
+            RefreshStage(true);
+        }
+
+        public void InitialiseDefinition(PlantDefinition strainDefinition)
+        {
+            if (strainDefinition == null) return;
+            definition = strainDefinition;
+            qualityScore = Mathf.Min(qualityScore, definition.MaximumQualityPotential);
             RefreshStage(true);
         }
 
@@ -212,7 +223,7 @@ namespace Growveld.Farming
             HarvestBatch batch = batchObject.GetComponent<HarvestBatch>();
             if (batch != null)
             {
-                batch.Initialise(CalculateHarvestYieldKilograms(), CurrentQualityGrade, HarvestStatus.Fresh);
+                batch.Initialise(CalculateHarvestYieldKilograms(), CurrentQualityGrade, definition, HarvestStatus.Fresh);
             }
 
             if (carryController != null)
@@ -274,7 +285,8 @@ namespace Growveld.Farming
 
         public void RestoreQuality(float restoredQualityScore, float restoredYieldPotential, float restoredAccumulatedScore, float restoredSampleSeconds)
         {
-            qualityScore = Mathf.Clamp(restoredQualityScore, 0f, 100f);
+            float maximum = definition != null ? definition.MaximumQualityPotential : 100f;
+            qualityScore = Mathf.Clamp(restoredQualityScore, 0f, maximum);
             yieldPotential = Mathf.Clamp(restoredYieldPotential, 0f, 2f);
             accumulatedCareScore = Mathf.Max(0f, restoredAccumulatedScore);
             careSampleSeconds = Mathf.Max(0f, restoredSampleSeconds);
@@ -336,7 +348,9 @@ namespace Growveld.Farming
 
             accumulatedCareScore += instantCareScore * realSeconds;
             careSampleSeconds += realSeconds;
-            qualityScore = careSampleSeconds <= 0f ? 100f : accumulatedCareScore / careSampleSeconds;
+            float rawQuality = careSampleSeconds <= 0f ? 100f : accumulatedCareScore / careSampleSeconds;
+            float sensitivity = definition != null ? definition.QualitySensitivity : 1f;
+            qualityScore = Mathf.Clamp(100f - (100f - rawQuality) * sensitivity, 0f, definition.MaximumQualityPotential);
 
             float careRatio = qualityScore / 100f;
             yieldPotential = Mathf.Lerp(0.42f, 1.12f, careRatio);

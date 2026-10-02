@@ -1,4 +1,5 @@
 using Growveld.Building;
+using Growveld.Player;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
@@ -19,6 +20,7 @@ namespace Growveld.UI
         [SerializeField] private BusinessTabletController tabletController;
         [SerializeField] private PlacementController placementController;
         [SerializeField] private ConstructionModeController constructionMode;
+        [SerializeField] private PlayerInputStateController inputState;
 
         private float previousTimeScale = 1f;
 
@@ -26,6 +28,7 @@ namespace Growveld.UI
 
         private void Awake()
         {
+            if (inputState == null) inputState = GetComponent<PlayerInputStateController>();
             resumeButton?.onClick.AddListener(Resume);
             controlsButton?.onClick.AddListener(() => SetControlsVisible(true));
             closeControlsButton?.onClick.AddListener(() => SetControlsVisible(false));
@@ -86,6 +89,7 @@ namespace Growveld.UI
             IsPaused = paused;
             if (paused)
             {
+                inputState?.SetPaused(true);
                 tabletController?.SetOpen(false);
                 placementController?.CancelPlacement();
                 constructionMode?.ExitMode();
@@ -104,8 +108,7 @@ namespace Growveld.UI
                 foreach (Behaviour behaviour in gameplayBehaviours) if (behaviour != null) behaviour.enabled = !paused;
             }
 
-            Cursor.lockState = paused ? CursorLockMode.None : CursorLockMode.Locked;
-            Cursor.visible = paused;
+            if (!paused) inputState?.SetPaused(false);
         }
 
         private void SetControlsVisible(bool visible)

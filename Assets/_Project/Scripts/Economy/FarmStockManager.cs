@@ -6,15 +6,17 @@ using UnityEngine;
 namespace Growveld.Economy
 {
     /// <summary>
-    /// Aggregated dried farm stock, kept separately by quality grade.
+    /// Aggregated dried farm stock, kept separately by strain and quality grade.
     /// </summary>
     public sealed class FarmStockManager : MonoBehaviour
     {
         [SerializeField] private List<FarmStockEntry> entries = new();
+        [SerializeField] private PlantDefinition defaultStrain;
 
         public event Action StockChanged;
 
         public IReadOnlyList<FarmStockEntry> Entries => entries;
+        public PlantDefinition DefaultStrain => defaultStrain;
         public float TotalKilograms
         {
             get
@@ -25,61 +27,93 @@ namespace Growveld.Economy
             }
         }
 
-        private void Awake()
+        public void AddStock(PlantDefinition strain, QualityGrade grade, float kilograms)
         {
-            EnsureEntries();
+            PlantDefinition resolved = strain != null ? strain : defaultStrain;
+            if (kilograms <= 0f || resolved == null) return;
+            GetEntry(resolved, grade, true).Add(kilograms);
+            StockChanged?.Invoke();
         }
 
-        public void AddStock(QualityGrade grade, float kilograms)
+        public void AddStock(QualityGrade grade, float kilograms) => AddStock(defaultStrain, grade, kilograms);
+
+        public float GetWeight(PlantDefinition strain, QualityGrade grade)
         {
-            if (kilograms <= 0f) return;
-            EnsureEntries();
-            GetEntry(grade).Add(kilograms);
-            StockChanged?.Invoke();
+            FarmStockEntry entry = GetEntry(strain, grade, false);
+            return entry != null ? entry.WeightKilograms : 0f;
         }
 
         public float GetWeight(QualityGrade grade)
         {
-            EnsureEntries();
-            return GetEntry(grade).WeightKilograms;
+            float total = 0f;
+            foreach (FarmStockEntry entry in entries)
+            {
+                if (entry != null && entry.QualityGrade == grade) total += entry.WeightKilograms;
+            }
+            return total;
         }
 
         public void ClearAll()
         {
-            EnsureEntries();
-            foreach (FarmStockEntry entry in entries) entry.Set(0f);
+            entries.Clear();
             StockChanged?.Invoke();
         }
 
         public void RestoreStock(float low, float standard, float premium, float topGrade)
         {
-            EnsureEntries();
-            GetEntry(QualityGrade.Low).Set(low);
-            GetEntry(QualityGrade.Standard).Set(standard);
-            GetEntry(QualityGrade.Premium).Set(premium);
-            GetEntry(QualityGrade.TopGrade).Set(topGrade);
+            entries.Clear();
+            AddRestoredEntry(defaultStrain, QualityGrade.Low, low);
+            AddRestoredEntry(defaultStrain, QualityGrade.Standard, standard);
+            AddRestoredEntry(defaultStrain, QualityGrade.Premium, premium);
+            AddRestoredEntry(defaultStrain, QualityGrade.TopGrade, topGrade);
             StockChanged?.Invoke();
         }
 
-        private FarmStockEntry GetEntry(QualityGrade grade)
+        public void RestoreEntries(IEnumerable<RestoredFarmStockEntry> restoredEntries)
         {
+            entries.Clear();
+            if (restoredEntries != null)
+            {
+                foreach (RestoredFarmStockEntry restored in restoredEntries)
+                {
+                    AddRestoredEntry(restored.Strain, restored.QualityGrade, restored.WeightKilograms);
+                }
+            }
+            StockChanged?.Invoke();
+        }
+
+        private void AddRestoredEntry(PlantDefinition strain, QualityGrade grade, float kilograms)
+        {
+            if (strain == null || kilograms <= 0f) return;
+            FarmStockEntry entry = GetEntry(strain, grade, true);
+            entry.Set(kilograms);
+        }
+
+        private FarmStockEntry GetEntry(PlantDefinition strain, QualityGrade grade, bool create)
+        {
+            entries ??= new List<FarmStockEntry>();
             foreach (FarmStockEntry entry in entries)
             {
-                if (entry.QualityGrade == grade) return entry;
+                if (entry != null && entry.Strain == strain && entry.QualityGrade == grade) return entry;
             }
-
-            FarmStockEntry created = new(grade);
+            if (!create || strain == null) return null;
+            FarmStockEntry created = new(strain, grade);
             entries.Add(created);
             return created;
         }
+    }
 
-        private void EnsureEntries()
+    public readonly struct RestoredFarmStockEntry
+    {
+        public RestoredFarmStockEntry(PlantDefinition strain, QualityGrade qualityGrade, float weightKilograms)
         {
-            entries ??= new List<FarmStockEntry>();
-            GetEntry(QualityGrade.Low);
-            GetEntry(QualityGrade.Standard);
-            GetEntry(QualityGrade.Premium);
-            GetEntry(QualityGrade.TopGrade);
+            Strain = strain;
+            QualityGrade = qualityGrade;
+            WeightKilograms = weightKilograms;
         }
+
+        public PlantDefinition Strain { get; }
+        public QualityGrade QualityGrade { get; }
+        public float WeightKilograms { get; }
     }
 }

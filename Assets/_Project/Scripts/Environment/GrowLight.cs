@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using Growveld.Core;
 using UnityEngine;
 
 namespace Growveld.Environment
@@ -28,6 +29,7 @@ namespace Growveld.Environment
         [SerializeField, Min(0f)] private float fallbackActiveRealSeconds = 1200f;
 
         private GrowRoomEnvironment currentRoom;
+        private GameTimeManager gameTime;
         private bool externalScheduleEnabled;
         private bool externalScheduleActive;
 
@@ -58,11 +60,20 @@ namespace Growveld.Environment
         {
             ResolveAndConfigureLight();
             if (!ActiveLights.Contains(this)) ActiveLights.Add(this);
+            BindToGameClock();
             RefreshState();
+        }
+
+        private void Start()
+        {
+            // All scene Awake calls have completed by Start, so this also covers unusual
+            // script ordering where the clock was not yet discoverable during OnEnable.
+            BindToGameClock();
         }
 
         private void OnDisable()
         {
+            UnbindGameClock();
             ActiveLights.Remove(this);
             IsActive = false;
             if (lightSource != null) lightSource.enabled = false;
@@ -70,11 +81,12 @@ namespace Growveld.Environment
 
         private void Update()
         {
+            if (gameTime == null) BindToGameClock();
             Vector3 roomSamplePosition = lightSource != null
                 ? lightSource.transform.position
                 : transform.position + Vector3.up;
             currentRoom = GrowRoomEnvironment.FindContainingRoom(roomSamplePosition);
-            RefreshState();
+            if (gameTime == null) RefreshState();
         }
 
         public bool Covers(Vector3 worldPosition, GrowRoomEnvironment requiredRoom)
@@ -97,6 +109,20 @@ namespace Growveld.Environment
             RefreshState();
         }
 
+        /// <summary>Immediately evaluates this instance against the authoritative game clock.</summary>
+        public void EvaluateSchedule(GameTimeManager clock)
+        {
+            if (clock != null && gameTime != clock) BindToGameClock(clock);
+            if (automaticSchedule && clock != null)
+            {
+                SetExternalSchedule(clock.AreGrowLightsScheduledOn);
+            }
+            else
+            {
+                ClearExternalSchedule();
+            }
+        }
+
         public void ClearExternalSchedule()
         {
             externalScheduleEnabled = false;
@@ -115,6 +141,48 @@ namespace Growveld.Environment
         public static IReadOnlyList<GrowLight> GetActiveLights()
         {
             return ActiveLights;
+        }
+
+        private void BindToGameClock()
+        {
+            GameTimeManager clock = GameTimeManager.Current;
+            if (clock == null) clock = FindFirstObjectByType<GameTimeManager>();
+            BindToGameClock(clock);
+        }
+
+        private void BindToGameClock(GameTimeManager clock)
+        {
+            if (gameTime == clock)
+            {
+                if (gameTime != null) HandleGameTimeChanged();
+                return;
+            }
+
+            UnbindGameClock();
+            gameTime = clock;
+            if (gameTime != null)
+            {
+                gameTime.TimeChanged += HandleGameTimeChanged;
+                HandleGameTimeChanged();
+            }
+        }
+
+        private void UnbindGameClock()
+        {
+            if (gameTime != null) gameTime.TimeChanged -= HandleGameTimeChanged;
+            gameTime = null;
+        }
+
+        private void HandleGameTimeChanged()
+        {
+            if (automaticSchedule && gameTime != null)
+            {
+                SetExternalSchedule(gameTime.AreGrowLightsScheduledOn);
+            }
+            else
+            {
+                ClearExternalSchedule();
+            }
         }
 
         private void RefreshState()

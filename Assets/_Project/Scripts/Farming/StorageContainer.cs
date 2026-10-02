@@ -58,7 +58,7 @@ namespace Growveld.Farming
             }
 
             storedKilograms += batch.WeightKilograms;
-            farmStock.AddStock(batch.QualityGrade, batch.WeightKilograms);
+            farmStock.AddStock(batch.Strain, batch.QualityGrade, batch.WeightKilograms);
             Destroy(batch.gameObject);
         }
 

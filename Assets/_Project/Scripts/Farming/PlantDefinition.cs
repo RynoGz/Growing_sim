@@ -3,13 +3,33 @@ using UnityEngine;
 namespace Growveld.Farming
 {
     /// <summary>
-    /// Configurable timings and baseline yield for the prototype's single crop.
+    /// Data-driven strain definition shared by seeds, plants, harvests, stock and sales.
     /// </summary>
     [CreateAssetMenu(menuName = "Growveld/Farming/Plant Definition", fileName = "Plant_")]
     public sealed class PlantDefinition : ScriptableObject
     {
-        [SerializeField] private string plantId = "generic_crop";
-        [SerializeField] private string displayName = "Generic Cannabis Plant";
+        [SerializeField] private string plantId = "northern_lights";
+        [SerializeField] private string displayName = "Northern Lights";
+        [SerializeField, TextArea] private string shortDescription;
+        [SerializeField, TextArea] private string guidanceText;
+        [SerializeField] private string difficulty = "Easy";
+        [SerializeField] private string growthLabel = "Fast";
+        [SerializeField] private string yieldLabel = "High";
+        [SerializeField] private string indoorSuitability = "Excellent";
+        [SerializeField] private string outdoorSuitability = "Good";
+        [SerializeField, Min(1)] private int unlockLevel = 1;
+        [SerializeField, Min(0f)] private float seedPurchasePrice = 180f;
+        [SerializeField, Min(0f)] private float baseSellingPricePerKilogram = 1200f;
+        [SerializeField, Range(1f, 100f)] private float maximumQualityPotential = 100f;
+        [SerializeField, Min(0.1f)] private float indoorGrowthModifier = 1f;
+        [SerializeField, Min(0.1f)] private float outdoorGrowthModifier = 1f;
+        [SerializeField, Min(0.1f)] private float waterConsumptionModifier = 1f;
+        [SerializeField, Min(0.1f)] private float nutrientConsumptionModifier = 1f;
+        [SerializeField, Range(0f, 100f)] private float preferredHumidityMinimum = 52f;
+        [SerializeField, Range(0f, 100f)] private float preferredHumidityMaximum = 66f;
+        [SerializeField, Min(0.1f)] private float qualitySensitivity = 1f;
+        [SerializeField] private Sprite shopIcon;
+        [SerializeField] private GameObject plantPrefab;
         [SerializeField, Min(1f)] private float germinationSeconds = 120f;
         [SerializeField, Min(1f)] private float seedlingSeconds = 240f;
         [SerializeField, Min(1f)] private float vegetativeSeconds = 540f;
@@ -28,6 +48,26 @@ namespace Growveld.Farming
 
         public string PlantId => plantId;
         public string DisplayName => displayName;
+        public string ShortDescription => shortDescription;
+        public string GuidanceText => guidanceText;
+        public string Difficulty => difficulty;
+        public string GrowthLabel => growthLabel;
+        public string YieldLabel => yieldLabel;
+        public string IndoorSuitability => indoorSuitability;
+        public string OutdoorSuitability => outdoorSuitability;
+        public int UnlockLevel => Mathf.Max(1, unlockLevel);
+        public float SeedPurchasePrice => seedPurchasePrice;
+        public float BaseSellingPricePerKilogram => baseSellingPricePerKilogram;
+        public float MaximumQualityPotential => maximumQualityPotential;
+        public float IndoorGrowthModifier => indoorGrowthModifier;
+        public float OutdoorGrowthModifier => outdoorGrowthModifier;
+        public float WaterConsumptionModifier => waterConsumptionModifier;
+        public float NutrientConsumptionModifier => nutrientConsumptionModifier;
+        public float PreferredHumidityMinimum => Mathf.Min(preferredHumidityMinimum, preferredHumidityMaximum);
+        public float PreferredHumidityMaximum => Mathf.Max(preferredHumidityMinimum, preferredHumidityMaximum);
+        public float QualitySensitivity => qualitySensitivity;
+        public Sprite ShopIcon => shopIcon;
+        public GameObject PlantPrefab => plantPrefab;
         public float GerminationSeconds => germinationSeconds;
         public float SeedlingSeconds => seedlingSeconds;
         public float VegetativeSeconds => vegetativeSeconds;
@@ -35,8 +75,8 @@ namespace Growveld.Farming
         public float BaseYieldKilograms => baseYieldKilograms;
         public float MaximumWater => maximumWater;
         public float MaximumNutrients => maximumNutrients;
-        public float WaterConsumptionPerRealMinute => waterConsumptionPerRealMinute;
-        public float NutrientConsumptionPerRealMinute => nutrientConsumptionPerRealMinute;
+        public float WaterConsumptionPerRealMinute => waterConsumptionPerRealMinute * waterConsumptionModifier;
+        public float NutrientConsumptionPerRealMinute => nutrientConsumptionPerRealMinute * nutrientConsumptionModifier;
         public float WaterPerUse => waterPerUse;
         public float NutrientsPerDose => nutrientsPerDose;
         public float HealthLossPerCriticalMinute => healthLossPerCriticalMinute;

@@ -1,4 +1,5 @@
 using Growveld.Building;
+using Growveld.Player;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -14,8 +15,14 @@ namespace Growveld.UI
         [SerializeField] private PlacementController placementController;
         [SerializeField] private ConstructionModeController constructionMode;
         [SerializeField] private TabletInventoryUI inventoryUI;
+        [SerializeField] private PlayerInputStateController inputState;
 
         public bool IsOpen { get; private set; }
+
+        private void Awake()
+        {
+            if (inputState == null) inputState = GetComponent<PlayerInputStateController>();
+        }
 
         private void Start()
         {
@@ -61,9 +68,7 @@ namespace Growveld.UI
                     if (behaviour != null) behaviour.enabled = !open;
                 }
             }
-
-            Cursor.lockState = open ? CursorLockMode.None : CursorLockMode.Locked;
-            Cursor.visible = open;
+            inputState?.SetTabletOpen(open);
         }
     }
 }

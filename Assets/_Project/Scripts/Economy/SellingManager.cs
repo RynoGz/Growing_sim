@@ -1,6 +1,7 @@
 using System;
 using System.Text;
 using Growveld.Farming;
+using Growveld.Progression;
 using UnityEngine;
 
 namespace Growveld.Economy
@@ -14,20 +15,21 @@ namespace Growveld.Economy
         [SerializeField] private FarmStockManager farmStock;
         [SerializeField] private Growveld.Farming.QualitySettings qualitySettings;
         [SerializeField] private SellingSettings sellingSettings;
+        [SerializeField] private BusinessProgression progression;
 
         public event Action<string, float> SaleCompleted;
 
         public string LastSaleSummary { get; private set; } = "No sales yet.";
+        public int LastExperienceAwarded { get; private set; }
 
         public float CalculateTotalSaleValue()
         {
             if (farmStock == null || qualitySettings == null || sellingSettings == null) return 0f;
             float total = 0f;
-            foreach (QualityGrade grade in Enum.GetValues(typeof(QualityGrade)))
+            foreach (FarmStockEntry entry in farmStock.Entries)
             {
-                total += farmStock.GetWeight(grade)
-                    * sellingSettings.BasePricePerKilogram
-                    * qualitySettings.GetPriceMultiplier(grade);
+                if (entry == null || entry.WeightKilograms <= 0f) continue;
+                total += entry.WeightKilograms * GetBasePrice(entry.Strain) * qualitySettings.GetPriceMultiplier(entry.QualityGrade);
             }
             return total;
         }
@@ -40,14 +42,20 @@ namespace Growveld.Economy
             }
 
             StringBuilder builder = new("SELL ALL STOCK\n\n");
-            foreach (QualityGrade grade in Enum.GetValues(typeof(QualityGrade)))
+            int experience = 0;
+            foreach (FarmStockEntry entry in farmStock.Entries)
             {
-                float weight = farmStock.GetWeight(grade);
-                float multiplier = qualitySettings.GetPriceMultiplier(grade);
-                float value = weight * sellingSettings.BasePricePerKilogram * multiplier;
-                builder.AppendLine($"{qualitySettings.GetDisplayName(grade)}: {weight:0.00} kg x R{sellingSettings.BasePricePerKilogram:N0} x {multiplier:0.00} = R{value:N0}");
+                if (entry == null || entry.WeightKilograms <= 0f) continue;
+                float basePrice = GetBasePrice(entry.Strain);
+                float multiplier = qualitySettings.GetPriceMultiplier(entry.QualityGrade);
+                float value = entry.WeightKilograms * basePrice * multiplier;
+                experience += progression != null ? progression.CalculateSaleExperience(entry.WeightKilograms, entry.QualityGrade) : 0;
+                string strainName = entry.Strain != null ? entry.Strain.DisplayName : "Northern Lights";
+                builder.AppendLine($"{strainName} - {qualitySettings.GetDisplayName(entry.QualityGrade)}");
+                builder.AppendLine($"{entry.WeightKilograms:0.00} kg x R{basePrice:N0} x {multiplier:0.00} = R{value:N0}\n");
             }
-            builder.AppendLine($"\nProjected total: R{CalculateTotalSaleValue():N0}");
+            builder.AppendLine($"Total: R{CalculateTotalSaleValue():N0}");
+            builder.AppendLine($"XP Earned: {experience:N0} XP");
             return builder.ToString();
         }
 
@@ -62,11 +70,35 @@ namespace Growveld.Economy
             }
 
             string breakdown = BuildProjectedSummary();
+            int experience = CalculateTotalExperience();
             farmStock.ClearAll();
+            foreach (StorageContainer storage in FindObjectsByType<StorageContainer>(FindObjectsInactive.Exclude, FindObjectsSortMode.None))
+            {
+                storage?.RestoreStoredKilograms(0f);
+            }
             economy.Credit(total, "Sold all farm stock");
-            LastSaleSummary = $"{breakdown}\n\nSALE COMPLETE: R{total:N0}";
+            progression?.AwardSale(total, experience);
+            LastExperienceAwarded = experience;
+            LastSaleSummary = $"{breakdown}\n\nSALE COMPLETE: R{total:N0}\nXP EARNED: {experience:N0}";
             SaleCompleted?.Invoke(LastSaleSummary, total);
             return true;
+        }
+
+        private int CalculateTotalExperience()
+        {
+            if (farmStock == null || progression == null) return 0;
+            int total = 0;
+            foreach (FarmStockEntry entry in farmStock.Entries)
+            {
+                if (entry != null) total += progression.CalculateSaleExperience(entry.WeightKilograms, entry.QualityGrade);
+            }
+            return total;
+        }
+
+        private float GetBasePrice(PlantDefinition strain)
+        {
+            if (strain != null) return strain.BaseSellingPricePerKilogram;
+            return sellingSettings != null ? sellingSettings.BasePricePerKilogram : 0f;
         }
     }
 }

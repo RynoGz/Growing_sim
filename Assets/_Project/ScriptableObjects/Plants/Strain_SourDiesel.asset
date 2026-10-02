@@ -1,0 +1,52 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3eca711f4cf94ac4680083272492ce0a, type: 3}
+  m_Name: Strain_SourDiesel
+  m_EditorClassIdentifier: Assembly-CSharp::Growveld.Farming.PlantDefinition
+  plantId: sour_diesel
+  displayName: Sour Diesel
+  shortDescription: A higher-value strain with strong growth potential, but it rewards
+    growers who maintain good conditions. Best suited to an established farm with
+    reliable water, nutrients and environmental control.
+  guidanceText: Moderate; higher demand and strong outdoors.
+  difficulty: Moderate
+  growthLabel: Slow
+  yieldLabel: High
+  indoorSuitability: Good
+  outdoorSuitability: Excellent
+  unlockLevel: 6
+  seedPurchasePrice: 480
+  baseSellingPricePerKilogram: 2050
+  maximumQualityPotential: 100
+  indoorGrowthModifier: 1
+  outdoorGrowthModifier: 1.12
+  waterConsumptionModifier: 1.18
+  nutrientConsumptionModifier: 1.3
+  preferredHumidityMinimum: 50
+  preferredHumidityMaximum: 62
+  qualitySensitivity: 1.1
+  shopIcon: {fileID: 0}
+  plantPrefab: {fileID: 8043868304584446466, guid: 6e21a6a87e1b31f43b65ef47c0259f5b, type: 3}
+  germinationSeconds: 150
+  seedlingSeconds: 270
+  vegetativeSeconds: 480
+  floweringSeconds: 900
+  baseYieldKilograms: 0.68
+  maximumWater: 100
+  maximumNutrients: 100
+  waterConsumptionPerRealMinute: 4
+  nutrientConsumptionPerRealMinute: 2
+  waterPerUse: 45
+  nutrientsPerDose: 35
+  healthLossPerCriticalMinute: 8
+  healthRecoveryPerGoodMinute: 2
+  qualitySettings: {fileID: 11400000, guid: 974d0af09f4ed9c48af1fc90101e926c, type: 2}

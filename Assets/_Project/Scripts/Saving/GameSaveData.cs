@@ -31,7 +31,7 @@ namespace Growveld.Saving
     [Serializable]
     public sealed class GameSaveData
     {
-        public int version = 1;
+        public int version = 2;
         public string savedAtUtc;
         public float balance;
         public int day;
@@ -50,6 +50,8 @@ namespace Growveld.Saving
         public List<DeliverySaveData> pendingDeliveries = new();
         public FarmStockSaveData farmStock = new();
         public UtilitySaveData utilities = new();
+        public ProgressionSaveData progression = new();
+        public List<AutomationSaveData> automation = new();
     }
 
     [Serializable]
@@ -73,6 +75,7 @@ namespace Growveld.Saving
     public sealed class PlantSaveData
     {
         public string containerKey;
+        public string strainId;
         public float elapsedGrowthSeconds;
         public float water;
         public float nutrients;
@@ -90,6 +93,7 @@ namespace Growveld.Saving
         public float weightKilograms;
         public QualityGrade qualityGrade;
         public HarvestStatus status;
+        public string strainId;
         public Vector3Data position;
         public QuaternionData rotation;
     }
@@ -135,10 +139,37 @@ namespace Growveld.Saving
     [Serializable]
     public sealed class FarmStockSaveData
     {
+        public List<FarmStockEntrySaveData> entries = new();
+        // Version 1 fields retained for automatic migration to Northern Lights.
         public float low;
         public float standard;
         public float premium;
         public float topGrade;
+    }
+
+    [Serializable]
+    public sealed class FarmStockEntrySaveData
+    {
+        public string strainId;
+        public QualityGrade qualityGrade;
+        public float weightKilograms;
+    }
+
+    [Serializable]
+    public sealed class ProgressionSaveData
+    {
+        public int currentLevel = 1;
+        public int currentExperience;
+        public int lifetimeExperience;
+        public float lifetimeSales;
+    }
+
+    [Serializable]
+    public sealed class AutomationSaveData
+    {
+        public string placedObjectId;
+        public bool operational = true;
+        public float storedResource;
     }
 
     [Serializable]

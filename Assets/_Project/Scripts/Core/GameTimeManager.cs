@@ -10,6 +10,8 @@ namespace Growveld.Core
     /// </summary>
     public sealed class GameTimeManager : MonoBehaviour
     {
+        public static GameTimeManager Current { get; private set; }
+
         [SerializeField] private TimeSettings settings;
         [SerializeField] private Light sun;
         [SerializeField] private UtilityManager utilities;
@@ -34,6 +36,16 @@ namespace Growveld.Core
                 int minute = Mathf.FloorToInt((timeOfDayHours - hour) * 60f) % 60;
                 return $"{hour:00}:{minute:00}";
             }
+        }
+
+        private void Awake()
+        {
+            Current = this;
+        }
+
+        private void OnDestroy()
+        {
+            if (Current == this) Current = null;
         }
 
         private void Start()
@@ -82,7 +94,7 @@ namespace Growveld.Core
             OutdoorEnvironment.Current?.SetExternalDaylight(IsDaylight);
             foreach (GrowLight growLight in GrowLight.GetActiveLights())
             {
-                growLight?.SetExternalSchedule(AreGrowLightsScheduledOn);
+                growLight?.EvaluateSchedule(this);
             }
 
             if (sun == null || settings == null) return;

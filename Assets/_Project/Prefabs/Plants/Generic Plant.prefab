@@ -554,7 +554,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f819dfb3af6349b47bfba8288650395e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Growveld.Farming.PlantInstance
-  definition: {fileID: 11400000, guid: 6c6fc440bf0047a4a95f44c6bf727ce8, type: 2}
+  definition: {fileID: 11400000, guid: a691d14251babed42968038044b34249, type: 2}
   stageVisuals:
   - {fileID: 3662688564197944960}
   - {fileID: 1770269678145589376}
